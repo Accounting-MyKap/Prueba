@@ -737,12 +737,12 @@ function summonMinions(u){
   sfx('fire',u.x);
 }
 function startThrow(u,tx,tz){
-  u.atkKind='throw';u.block=false;u.blockT=0;u.atkT=0;u.hit=false;u.throwX=tx;u.throwZ=tz;u.dir=Math.sign(tx-u.x)||u.dir;
+  u.atkKind='throw';u.block=false;u.blockT=0;u.atkT=0;u.hit=false;u.throwZ=tz;if(G.ctrl!==u.id)u.dir=Math.sign(tx-u.x)||u.dir;u.throwX=(tx-u.x)*u.dir>70?tx:u.x+u.dir*220;
   u.cd=SPEAR_THROW.atk*(G.ctrl===u.id?.9:1.1);u.throwCd=1.6;
 }
 function throwJavelin(u){
   const [hx,hy]=handWorld(u),{d}=dmgOf(u),tier=tierOf(u);
-  const tx=u.throwX,tz=u.throwZ??u.z,ty=GROUND+tz-32,dx=tx-hx,Tt=.35+Math.abs(dx)/1000;
+  const tx=(u.throwX-hx)*u.dir>60?u.throwX:hx+u.dir*160,tz=u.throwZ??u.z,ty=GROUND+tz-32,dx=tx-hx,Tt=.35+Math.abs(dx)/1000;
   G.proj.push({k:'jav',x:hx,y:hy,vx:dx/Tt,vy:(ty-hy-.5*GRAV*Tt*Tt)/Tt,team:u.team,dmg:JAV_DMG*d/TYPES.spear.dmg,src:u.id,z:tz,stuck:0,life:6,pierce:tier>=1?3:2,hitIds:[],tier});
   u.ammo=Math.max(0,u.ammo-1);sfx('swing',u.x);
   if(u.team===0&&G.ctrl===u.id&&u.ammo===0)float(u.x,GROUND+u.z-78,'¡Espada!','#f1e7d3',14,u.z);
@@ -1056,7 +1056,7 @@ function controlled(u,dt){
     if((atk||wantThrow)&&u.cd<=0&&!busy&&!u.block){
       if(u.ammo>0&&wantThrow){
         let tx,tz=u.z;
-        if(inp.aimActive)tx=inp.mx;
+        if(inp.aimActive&&(inp.mx-u.x)*u.dir>70)tx=inp.mx; // aim at the cursor only when it is in front
         else{let best=null;for(const o of G.units){if(o.team===u.team||o.dead||o.hidden)continue;const dx=(o.x-u.x)*u.dir;if(dx>40&&dx<320&&(!best||dx<(best.x-u.x)*u.dir))best=o}tx=best?best.x:u.x+u.dir*220;if(best)tz=best.z}
         startThrow(u,tx,tz);
       }else if(atk)startAttack(u,null);
@@ -2079,7 +2079,7 @@ function takeControl(u){inp.jump=inp.dash=inp.special=false;const prev=G.ctrl!==
     :(u.type==='miner'?'Minero: pica junto a una mina (Espacio) y lleva el oro a tu estatua':u.type==='spear'?'Lancero: Espacio ataca · F lanza la lanza al cursor · mantén Q para bloquear':(u.type==='mage'?'Mago: Espacio lanza fuego que aturde · F invoca esbirros':u.type==='sword'?'Espadachín: WASD mover · Espacio ataca · mantén Q para bloquear':`Controlas a un ${TYPES[u.type].n}: WASD mover, J saltar, Shift esquivar`)))}
 function releaseControl(){if(G.ctrl!==null){const u=G.units.find(o=>o.id===G.ctrl);if(u){u.charge=0;u.block=false;resetMiner(u)}G.ctrl=null}inp.block=false}
 document.querySelectorAll('#pad [data-k]').forEach(b=>{const kx=b.dataset.k;
-  b.addEventListener('pointerdown',e=>{e.preventDefault();inp[kx]=true;if(kx==='atk'){inp.aimActive=false;inp.atkQ=true}});
+  b.addEventListener('pointerdown',e=>{e.preventDefault();inp[kx]=true;if(kx==='atk'){inp.aimActive=false;inp.atkQ=true}if(kx==='special')inp.aimActive=false});
   for(const ev of ['pointerup','pointerleave','pointercancel'])b.addEventListener(ev,()=>{if(kx!=='jump'&&kx!=='dash'&&kx!=='special')inp[kx]=false})});
 $('#padRelease').addEventListener('click',releaseControl);
 {const st=$('#stick'),knob=st.querySelector('i');let sid=null;
