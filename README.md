@@ -34,7 +34,7 @@ La bola de fuego sigue un arco de mortero (unos 45–50°) y cae en el carril de
 
 ## Guarnición
 
-Con la orden *Guarnición* todas las tropas se refugian en la estatua, se curan y disparan desde el pedestal (se ven de pie sobre él, como en el original). Los arqueros disparan con su daño normal y alcance de 560 px, los magos lanzan bolas de fuego, y el resto dispara flechas más débiles. La IA también se refugia cuando una fuerza mayor llega a sus puertas.
+Detrás de cada estatua hay una empalizada de lanzas afiladas. Con la orden *Guarnición* todas las tropas se retiran detrás de ella, se curan, no pueden ser atacadas y disparan como arqueros (los mineros incluidos, como en el original). Los arqueros disparan con su daño normal y alcance de 560 px, los magos lanzan bolas de fuego, y el resto dispara flechas más débiles. La IA también se refugia cuando una fuerza mayor llega a sus puertas.
 
 ## Sangre y muertes
 

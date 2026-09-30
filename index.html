@@ -264,7 +264,7 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
             <h2>Novedades</h2>
             <ul class="news">
               <li><b>Conquista de naciones.</b> 8 batallas: cada nación vencida te da su unidad. Gana coronas para la Armería.</li>
-              <li><b>Guarnición y sangre.</b> Tus tropas disparan desde la estatua; las flechas se clavan y los caídos dejan charcos.</li>
+              <li><b>Guarnición y sangre.</b> Tus tropas disparan tras una empalizada de lanzas; las flechas se clavan y los caídos dejan charcos.</li>
               <li><b>Mundo 3D.</b> Luces y sombras reales, ciclo día/noche y cuatro vistas de cámara.</li>
               <li><b>Forja.</b> Cada mejora de unidad cambia su arma y armadura y aumenta su daño.</li>
               <li><b>Animación esquelética.</b> Piernas con IK, golpes con estela, muertes con física ragdoll.</li>
@@ -660,12 +660,13 @@ function statueDown(team){
   for(const u of G.units)if(u.team===team&&!u.dead){u.hidden=false}
 }
 const WALL_RANGE=560;
-const wallSlot=u=>({x:-50+(u.id%8)*14,z:-44+((u.id>>3)%2)*14});
+const BARRICADE=-118,GARRISON_X=-128;
+const wallSlot=u=>({x:-132-(u.id%4)*13-((u.id>>2)%2)*6,z:-18+((u.id>>2)%6)*7.2});
 function garrisonShoot(u){
   if(u.cd>0)return;
   const T=TYPES[u.type],team=u.team,fwd=team?-1:1,home=STATUE[team];
   const n=nearestEnemy(u);if(!n||n.t.statue!==undefined||Math.abs(n.t.x-home)>(u.type==='mage'?effRange(u)+60:WALL_RANGE))return;
-  const sl=wallSlot(u),hx=home+fwd*sl.x,z0=sl.z,hy=GROUND+z0-106;u.wallShot=G.t;
+  const sl=wallSlot(u),hx=home+fwd*(sl.x+6),z0=sl.z,hy=GROUND+z0-44;u.wallShot=G.t;
   if(u.type==='mage'){u.cd=T.cd;lobFire(team,hx,hy,n.t.x,n.t.z,dmgOf(u).d,u.id,T.aoe*G.mods[team].aoe,z0);return}
   const d=u.type==='archer'?dmgOf(u).d:10*(1+.12*u.rank);u.cd=u.type==='archer'?T.cd:2.1;
   fireArrow(team,hx,hy,n.t,d,u.id,u.type==='archer'&&tierOf(u)>=3,z0);sfx('bow',hx);
@@ -885,7 +886,7 @@ function depositGold(u){
 }
 function minerAI(u,dt){
   const tm=G.teams[u.team],fwd=u.team?-1:1,home=STATUE[u.team],spd=TYPES.miner.spd*(tm.rage>0?1.3:1);
-  if(G.command[u.team]===0){const gx=home-fwd*20;if(moveTo(u,gx,spd,dt)){u.hidden=true;u.hp=Math.min(u.max,u.hp+14*dt);garrisonShoot(u)}return}
+  if(G.command[u.team]===0){const gx=home+fwd*GARRISON_X;if(moveTo(u,gx,spd,dt)){u.hidden=true;u.hp=Math.min(u.max,u.hp+14*dt);garrisonShoot(u)}return}
   u.hidden=false;
   if(u.carry>0||u.state==='toBase'){
     u.state='toBase';u.z=lerp(u.z,u.z0,Math.min(1,dt*1.5));
@@ -908,7 +909,7 @@ function soldierAI(u,dt){
   const T=TYPES[u.type],team=u.team,fwd=team?-1:1,home=STATUE[team],cmd=G.command[team],tm=G.teams[team];
   const spd=T.spd*(tm.rage>0?1.3:1),range=effRange(u);
   if(cmd===0){
-    const gx=home-fwd*20;
+    const gx=home+fwd*GARRISON_X;
     if(Math.abs(u.x-gx)<6){
       u.hidden=true;u.moving=false;u.hp=Math.min(u.max,u.hp+14*dt);
       garrisonShoot(u);
@@ -1616,6 +1617,19 @@ function buildStatue(team,style){
   for(let i=0;i<12;i++){const m=mkMesh(new THREE.DodecahedronGeometry(1,0),darkM,rubble,(hash(i+team*9)-.5)*13,.6+hash(i*3)*.8,(hash(i*5+team)-.5)*8);m.scale.setScalar(1+hash(i*7)*1.6);m.rotation.set(hash(i)*3,hash(i*2)*3,0)}
   return {team,f,g,fig,stoneM,style,arrow,base:new THREE.Color(team?0x6e625d:0xaaa18f),flagGeo,flagBase,flames,halos,lights,rubble,parts:[fig,flag,pole,...flames,...halos]};
 }
+function buildBarricade(team){
+  const f=team?-1:1,g=new THREE.Group();g.position.set((STATUE[team]+f*BARRICADE)*SC,0,0);scene.add(g);
+  const woodM=new THREE.MeshStandardMaterial({color:0x5a4030,roughness:.9}),darkM=new THREE.MeshStandardMaterial({color:0x2e241c,roughness:1}),tipM=new THREE.MeshStandardMaterial({color:0x8d949b,roughness:.35,metalness:.7});
+  const cyl=new THREE.CylinderGeometry(1,1,1,6),cone=new THREE.ConeGeometry(1,1,6);
+  for(let z=-6.2;z<=6.2;z+=.62){for(const row of [0,1]){
+    const lz=z+row*.31,base=[-f*(1.2+row*.9),.05,lz],len=6.2+hash(z*7+row)*1.4,ang=.55+row*.18+(hash(z*3+row)-.5)*.12;
+    const tip=[base[0]+f*Math.cos(ang)*len,base[1]+Math.sin(ang)*len,lz];beam(cyl,row?darkM:woodM,g,base,tip,.07);
+    const dx=tip[0]-base[0],dy=tip[1]-base[1],dl=Math.hypot(dx,dy);beam(cone,tipM,g,tip,[tip[0]+dx/dl*.55,tip[1]+dy/dl*.55,lz],.1)}}
+  for(const h of [.9,2]){const log=mkMesh(cyl,darkM,g,f*(h-.2),h,0);log.rotation.x=Math.PI/2;log.scale.set(.2,13.2,.2)}
+  for(const z of [-6.4,-2,2,6.4]){beam(cyl,darkM,g,[-f*1.4,0,z],[f*1.8,2.4,z],.12)}
+  return g;
+}
+const BARR=[buildBarricade(0),buildBarricade(1)];
 const STG=[buildStatue(0,'order'),buildStatue(1,'chaos')];
 const statueStyle=t=>t===0?'order':G&&G.kind==='campaign'&&LEVELS[G.level]?LEVELS[G.level].faction:'chaos';
 function syncStatues(){for(let t=0;t<2;t++){const st=statueStyle(t);if(STG[t].style!==st){scene.remove(STG[t].g);STG[t]=buildStatue(t,st)}}}
@@ -1701,7 +1715,7 @@ function render3D(dt){
     if(u.hidden){
       if(!G.teams[u.team].statue.hp)continue;
       const sl=wallSlot(u),fw=u.team?-1:1,ty=u.type==='mage'?'mage':'archer';
-      const fk=GARF.get(u.id)||{id:u.id,team:u.team,y:64,phase:0,moving:false,rank:0,flash:0,dash:0,carry:0,charge:0,state:'idle',mineT:0,hidden:false,ammo:0,block:false};GARF.set(u.id,fk);
+      const fk=GARF.get(u.id)||{id:u.id,team:u.team,y:0,phase:0,moving:false,rank:0,flash:0,dash:0,carry:0,charge:0,state:'idle',mineT:0,hidden:false,ammo:0,block:false};GARF.set(u.id,fk);
       Object.assign(fk,{type:ty,x:STATUE[u.team]+fw*sl.x,z:sl.z,dir:fw,aim:.32});
       const since=G.t-(u.wallShot??-9),atk=TYPES[ty].atk,ha=TYPES[ty].hitAt*atk;
       fk.atkT=since<atk-ha?ha+since:(u.cd>0&&u.cd<ha?ha-u.cd:-1);
