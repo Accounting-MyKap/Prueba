@@ -21,6 +21,17 @@ Inspirados en los espartanos de *300*:
 - **IA:** levantan el escudo ante el golpe de un gigante o cuando les llueven flechas, y con la orden *Defender* forman un muro de escudos.
 - **Control directo:** clic o `Espacio` lanza la lanza hacia el cursor si no hay nadie al alcance (si lo hay, ataca cuerpo a cuerpo). Mantén `S` o `↓` (botón 🛡 en el móvil) para bloquear.
 
+## Magos
+
+La bola de fuego sigue un arco de mortero (unos 45–50°) y cae en el carril del objetivo. La IA apunta adelantándose a los enemigos en movimiento. Al controlar un mago se ve la trayectoria y el círculo de la explosión donde apuntas.
+
+## En el celular
+
+- En pantallas bajas la barra de unidades flota sobre el césped como una franja delgada (solo icono y costo) y el campo de batalla ocupa toda la pantalla.
+- La cámara se acerca sola según el tamaño de la pantalla; pellizca con dos dedos para hacer zoom y usa el botón de cámara para cambiar de vista.
+- Al controlar un soldado la barra se oculta y quedan los botones de mover, esquivar, saltar, bloquear (lancero), atacar y soltar.
+- Menos carga gráfica en móviles (sombras y resolución más bajas). En vertical se sugiere girar el teléfono.
+
 ## Poderes y visión
 
 Lluvia de flechas y Meteoro solo se pueden lanzar donde tus tropas ven: cerca de tu estatua o a menos de ~340 px de una de tus unidades. El minimapa oscurece lo que no ves y el círculo de apuntado se pone rojo fuera de la visión. La IA sigue la misma regla, así que no puede bombardear tus minas sin acercarse.
