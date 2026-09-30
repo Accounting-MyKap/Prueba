@@ -400,7 +400,7 @@ const TYPES={
 };
 const GI=u=>u.type==='giant'||u.type==='boss';
 // Spearmen: throw the spear (javelin), then fight with a short sword (xiphos) behind the shield
-const SPEAR_SWORD={...TYPES.spear,dmg:18,range:22,cd:.8,atk:.45,hitAt:.45},SPEAR_THROW={...TYPES.spear,atk:.72,hitAt:.55};
+const SPEAR_SWORD={...TYPES.spear,dmg:18,range:22,cd:.8,atk:.45,hitAt:.45},SPEAR_THROW={...TYPES.spear,atk:1.05,hitAt:.6};
 const JAV_DMG=60;
 function ws(u){if(u.type!=='spear')return TYPES[u.type];if(u.atkKind==='throw')return SPEAR_THROW;return u.ammo>0?TYPES.spear:SPEAR_SWORD}
 const ORDER=['miner','sword','archer','spear','mage','giant'];
@@ -685,6 +685,10 @@ function tickAttack(u,dt){
   const T=ws(u);
   u.atkT+=dt*(G.teams[u.team].rage>0?1.25:1);
   const p=u.atkT/T.atk;
+  if(u.atkKind==='throw'){
+    if(p<.3&&u.y<=0){const sp=TYPES.spear.spd*1.9;u.x=clamp(u.x+u.dir*sp*dt,30,WORLD_W-30);u.moving=true;u.phase+=dt*sp/(8.5*TYPES.spear.size)}
+    else u.moving=false;
+  }
   if(!u.hit&&p>=T.hitAt){u.hit=true;doHit(u)}
   if(p>=1){u.atkT=-1;u.atkKind=null}
 }
@@ -1103,7 +1107,7 @@ function swingPose(p,w,b1,b2,bl){
 }
 function pose(u){
   const T=ws(u),t=G?G.t:0,ph=u.phase,mv=u.moving,air=u.y>.5;
-  const run=mv&&(u.dash>0||(G&&G.teams[u.team].rage>0));
+  const run=mv&&(u.dash>0||u.atkKind==='throw'||(G&&G.teams[u.team].rage>0));
   let lean=mv?(run?.28:.13):.03;
   let hipY=mv?-29-(1-Math.abs(Math.sin(ph)))*2.2:-28.6+Math.sin(t*2.2+u.id)*.6;
   const stride=run?12:9,lift=run?8:6;
@@ -1125,11 +1129,11 @@ function pose(u){
     case 'spear':{
       ba1=1.15;ba2=.35;
       if(u.atkKind==='throw'&&p>=0){
-        const w=T.hitAt,wind=w*.75;let e;
-        if(p<wind){e=ease(p/wind);fa1=lerp(.7,-2.2,e);fa2=lerp(1,.5,e);lean=lerp(lean,-.16,e);wAng=lerp(2.2,2.05,e)}
-        else if(p<w+.08){e=outQ((p-wind)/(w+.08-wind));fa1=lerp(-2.2,1.5,e);fa2=lerp(.5,.1,e);lean=lerp(-.16,.32,e);wAng=lerp(2.05,1.75,e);step=e*9}
-        else{e=ease((p-w-.08)/(1-w-.08));fa1=lerp(1.5,.6,e);fa2=lerp(.1,.7,e);lean=lerp(.32,.03,e);wAng=1.75;step=(1-e)*9}
-        ba1=1.35;ba2=.05;
+        const w=T.hitAt,a1=.3,b1=w-.18,c1=w+.06;let e;ba2=.1;
+        if(p<a1){e=outQ(Math.min(1,p/(a1*.6)));fa1=lerp(.7,-2.7,e);fa2=lerp(1,.9,e);wAng=lerp(2.2,1.75,e);ba1=lerp(1.15,.9,e)}
+        else if(p<b1){e=ease((p-a1)/(b1-a1));fa1=lerp(-2.7,-1.45,e);fa2=lerp(.9,0,e);wAng=lerp(1.75,1.92,e);lean=lerp(.2,-.28,e);step=e*10;ba1=lerp(.9,1.75,e)}
+        else if(p<c1){e=ease((p-b1)/(c1-b1));fa1=lerp(-1.45,-4.4,e);fa2=lerp(0,.05,e);wAng=lerp(1.92,1.8,e);lean=lerp(-.28,.36,e);step=10+e*3;strike=e;ba1=lerp(1.75,.2,e)}
+        else{e=ease((p-c1)/(1-c1));fa1=e<.6?lerp(-4.4,-5.6,e/.6):lerp(.683,.7,(e-.6)/.4);fa2=lerp(.05,1,e);wAng=1.8;lean=lerp(.36,.03,e);step=(1-e)*13;ba1=lerp(.2,1.15,e)}
       }else if(u.ammo<=0){
         wAng=fa1+fa2+.12;
         if(p>=0){const r=swingPose(p,T.hitAt,fa1,fa2,lean);fa1=r[0];fa2=r[1];lean=r[2];step=r[3];strike=r[4];wAng=fa1+fa2+.12}
@@ -1313,7 +1317,7 @@ function unit3D(u,tier,main){
   if(u.yaw){UT=UTM.makeTranslation(bx,0,bz).multiply(_ry.makeRotationY(u.yaw)).multiply(_m4.makeTranslation(-bx,0,-bz))}else UT=null;
   try{
   const P=(p,side)=>[bx+p[0]*d*k,by-p[1]*k,bz+side*k];
-  const ink=u.flash>0?C.flash:u.type==='minion'?[0x2a1838,0x3a1020][tm]:C.ink[tm],acc=C.acc[tm],trim=C.trim[tm];
+  const ink=u.type==='minion'?[0x2a1838,0x3a1020][tm]:C.ink[tm],acc=C.acc[tm],trim=C.trim[tm];
   const R=(gi?2.35:2.05)*k,hr=(gi?5.6:7.6)*k,sack=0x121010,crestC=[0xb3261e,0x1c0a0a][tm],bronze=0xb88a3e;
   const aimArm=(u.type==='archer'&&(J.draw>0||u.atkT>=0||u.charge>0))||gi;
   const bs=aimArm?1.2:-3.4;

@@ -26,7 +26,7 @@ Inspirado en el original: palitos de extremidades gruesas y redondeadas con cabe
 
 Inspirados en los espartanos de *300*:
 
-- **Lanzamiento:** al ver un enemigo a media distancia lanzan su lanza (60 de daño, atraviesa 2 enemigos). Después siguen con una espada corta más rápida.
+- **Lanzamiento:** al ver un enemigo a media distancia toman impulso con unos pasos, suben la lanza sobre el hombro, echan el brazo atrás y la arrojan por encima de la cabeza como una jabalina (60 de daño, atraviesa 2 enemigos). Después siguen con una espada corta más rápida.
 - **Recuperar la lanza:** la lanza queda clavada en el suelo; pasar sobre ella la recoge, y al volver a la estatua se rearman. Las lanzas propias en el suelo se marcan con un anillo dorado.
 - **Escudo:** bloqueando de frente reciben ~30% del daño normal (las flechas casi nada; la magia, 60%). Por la espalda no protege. No pueden atacar mientras bloquean y se mueven más lento.
 - **IA:** levantan el escudo ante el golpe de un gigante o cuando les llueven flechas, y con la orden *Defender* forman un muro de escudos.
@@ -53,6 +53,7 @@ Detrás de cada estatua hay una empalizada de lanzas afiladas. Con la orden *Gua
 - Quien muere por flecha se desploma hacia atrás; los golpes fuertes y explosiones lanzan el cuerpo.
 - Los cuerpos sangran y forman un charco que crece; la sangre y los charcos quedan en el campo unos 40 segundos antes de desaparecer.
 - Los heridos (menos de 40% de vida) gotean sangre.
+- Al recibir un golpe no hay destello: solo salpica sangre.
 - Las armas caen al suelo: espadas y lanzas quedan clavadas, arcos y picos tumbados.
 - Botón *Sangre: Sí/No* en el menú y en la pausa para desactivarla.
 
