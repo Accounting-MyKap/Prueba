@@ -11,7 +11,7 @@ Inspirado en el original: palitos de extremidades gruesas y redondeadas con cabe
 - **Minero:** pico y un gran saco negro a la espalda que se infla al cargar oro.
 - **Espadachín:** palito liso con espada (las mejoras añaden hombreras, yelmo y capa).
 - **Arquero:** arco y carcaj con flechas a la espalda.
-- **Lancero:** casco corintio de bronce con cresta roja de lado a lado, escudo redondo de bronce con anillos rojos y lanza larga.
+- **Lancero:** casco corintio de bronce con cresta roja de lado a lado, escudo ovalado de bronce con anillos rojos y lanza larga.
 - **Mago:** sombrero puntiagudo doblado, barba gris larga y bastón.
 - **Gigante:** encorvado, con hombros enormes, cabeza pequeña y garrote con púas.
 
@@ -25,6 +25,8 @@ Inspirado en el original: palitos de extremidades gruesas y redondeadas con cabe
 ## Lanceros
 
 Inspirados en los espartanos de *300*:
+
+- **Combate como hoplita:** en combate se agachan tras un escudo ovalado y alto, con la lanza por encima del hombro a la altura de la cabeza, y atacan con estocadas por encima del escudo. Al marchar llevan la lanza vertical.
 
 - **Lanzamiento:** al ver un enemigo a media distancia toman impulso con unos pasos, suben la lanza sobre el hombro, echan el brazo atrás y la arrojan por encima de la cabeza como una jabalina (60 de daño, atraviesa 2 enemigos). Después siguen con una espada corta más rápida.
 - **Recuperar la lanza:** la lanza queda clavada en el suelo; pasar sobre ella la recoge, y al volver a la estatua se rearman. Las lanzas propias en el suelo se marcan con un anillo dorado.
