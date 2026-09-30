@@ -11,6 +11,31 @@ Abre `index.html` en el navegador para jugar.
 - **Órdenes:** Guarnición, Defender y Atacar.
 - **Control directo:** toma el mando de cualquier soldado.
 
+## Campaña
+
+8 batallas en orden. Cada nivel desbloquea unidades o poderes y cambia las reglas del enemigo:
+
+| # | Nivel | Novedad |
+|---|---|---|
+| 1 | Primer filo | Mineros y espadas |
+| 2 | Arcos en la colina | Arqueros y Furia |
+| 3 | Muro de escudos | Lanceros y Lluvia de flechas |
+| 4 | Noche eterna | Magos; siempre es de noche |
+| 5 | Asedio | La estatua enemiga tiene 7000 de vida; +600 de oro inicial |
+| 6 | El despertar | Gigantes y Meteoro |
+| 7 | Resistir | Supervivencia: aguanta 4 minutos contra una horda |
+| 8 | Trono del Caos | Jefe final: el Rey Gigante aparece al minuto |
+
+Cada victoria da hasta 3 estrellas: ganar, terminar con la estatua por encima del 50% y ganar por debajo del tiempo objetivo (en *Resistir*, terminar por encima del 80%). Las estrellas nuevas dan coronas; repetir un nivel ya completado da 25.
+
+### Armería
+
+Las coronas se gastan entre batallas en 11 mejoras permanentes (hasta 3 niveles cada una): más oro por minero, oro inicial, entrenamiento más rápido, estatua más resistente, mejoras por tipo de unidad, más maná y la Academia, con la que las tropas nacen con rango ★.
+
+El progreso se guarda en el navegador (`localStorage`). Desde la Armería se puede reiniciar.
+
+La **escaramuza** sigue disponible con todo desbloqueado, sin mejoras y con 3 dificultades.
+
 ## Mejoras sobre el original
 
 | Área | Qué cambia |
