@@ -49,10 +49,16 @@ La bola de fuego sigue un arco de mortero (unos 45–50°) y cae en el carril de
 
 ## En el celular
 
-- En pantallas bajas la barra de unidades flota sobre el césped como una franja delgada (solo icono y costo) y el campo de batalla ocupa toda la pantalla.
-- La cámara se acerca sola según el tamaño de la pantalla; pellizca con dos dedos para hacer zoom y usa el botón de cámara para cambiar de vista.
-- Al controlar un soldado la barra se oculta y quedan los botones de mover, esquivar, saltar, bloquear (lancero), atacar y soltar.
-- Menos carga gráfica en móviles (sombras y resolución más bajas). En vertical se sugiere girar el teléfono.
+- **Joystick:** a la izquierda, para mover la unidad controlada en todas las direcciones.
+- **Botones de acción en abanico:** ⚔ grande para atacar (un toque = un golpe; en el arquero, mantener carga el tiro), y alrededor saltar, esquivar, bloquear 🛡, habilidad (🎯 lanza / ✦ esbirros) y soltar ✕.
+- **Seguir al frente:** botón de mira en la barra superior; la cámara sigue a tu primera línea sola.
+- **Pantalla completa:** botón junto a la mira; intenta además fijar la orientación horizontal.
+- **Barra de unidades:** franja flotante con botones más grandes (icono y costo).
+- **Poderes:** al elegir Flechas o Meteoro aparece una barra con *Cancelar*.
+- **Vibración:** al recibir golpes con tu unidad, al lanzar poderes y cuando falta oro.
+- **Vertical:** aviso para girar el teléfono, con opción de seguir en vertical.
+- **Rendimiento:** menos árboles y hierba; si el juego va a menos de ~38 FPS, baja la resolución y quita las sombras automáticamente.
+- Pellizca con dos dedos para hacer zoom.
 
 ## Guarnición
 
@@ -82,6 +88,13 @@ Las unidades pueden moverse hacia el fondo o el frente del campo; al hacerlo cam
 
 - La bola de fuego aturde 0,8 s a los enemigos alcanzados (salvo gigantes); se ven estrellas girando sobre su cabeza.
 - `F` (o la IA cuando se acercan enemigos) invoca 2 esbirros oscuros con espada corta que duran 24 s y pueden bloquear con `Q` si los controlas.
+
+## Ataques especiales
+
+- **Lluvia de flechas:** la zona se marca en el suelo, tus arqueros cercanos apuntan al cielo y disparan a la vez, y la lluvia cae poco después.
+- **Furia:** tus soldados se detienen, levantan las armas en un grito de guerra y quedan envueltos en un aura roja con ojos encendidos.
+- **Meteoro:** un círculo rojo marca el impacto y se va cerrando mientras cae una roca en llamas girando; al impactar deja un cráter, ondas expansivas, rocas volando y fuego en el suelo que quema durante unos segundos.
+- **Mago:** círculo mágico bajo sus pies mientras carga; los esbirros salen de un portal.
 
 ## Poderes y visión
 
