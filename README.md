@@ -58,7 +58,7 @@ Detrás de cada estatua hay una empalizada de lanzas afiladas. Con la orden *Gua
 
 ## Profundidad
 
-Las unidades pueden moverse hacia el fondo o el frente del campo. El cuerpo a cuerpo y los proyectiles solo aciertan a quien está en una franja cercana de profundidad: la IA se alinea con su objetivo y, controlando un soldado, puedes esquivar flechas cambiando de carril.
+Las unidades pueden moverse hacia el fondo o el frente del campo; al hacerlo caminan y giran el cuerpo hacia donde van (hasta unos 60°). El cuerpo a cuerpo y los proyectiles solo aciertan a quien está en una franja cercana de profundidad: la IA se alinea con su objetivo y, controlando un soldado, puedes esquivar flechas cambiando de carril.
 
 ## Magos: aturdimiento y esbirros
 

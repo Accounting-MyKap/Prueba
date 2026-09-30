@@ -850,6 +850,20 @@ function ai(team,dt){
 }
 
 // ───────────────────────── unit update ─────────────────────────
+// Units walking toward/away from the camera animate their legs and turn their body (up to ~60°)
+const DEPTH_K=.25/.1; // world depth units per px vs world x units per px
+function depthWalk(u,px,pz,dt){
+  if(!dt)return;
+  const dz=u.z-pz,dx=u.x-px,vzs=Math.abs(dz)/dt;
+  let target=0;
+  if(vzs>4&&u.y<=0&&!(u.stun>0)&&u.atkT<0){
+    u.moving=true;u.phase+=Math.abs(dz)*DEPTH_K/(8.5*TYPES[u.type].size);
+    const fx=dx*u.dir>0?dx:0,fz=dz*DEPTH_K;
+    target=clamp(Math.atan2(-fz*u.dir,Math.abs(fx)),-1.05,1.05)*(Math.abs(fx)>Math.abs(fz)*3?0:1);
+  }
+  u.yaw=(u.yaw||0)+(target-(u.yaw||0))*Math.min(1,dt*9);
+  if(Math.abs(u.yaw)<.003)u.yaw=0;
+}
 function moveTo(u,x,spd,dt){
   const dx=x-u.x;
   if(Math.abs(dx)>3){const s=Math.sign(dx);u.dir=s;u.x+=s*Math.min(Math.abs(dx),spd*dt);u.moving=true;u.phase+=dt*spd/(8.5*TYPES[u.type].size);return false}
@@ -1016,7 +1030,7 @@ function update(dt){
     if(!G.over)for(const k of ORDER){if(tm.queue[k]>0){tm.prog[k]+=dt/(TYPES[k].build*G.mods[t].build);if(tm.prog[k]>=1){tm.prog[k]=0;tm.queue[k]--;spawn(t,k);if(t===0&&!G.demo){G.stats.trained++;sfx('train')}}}}
     if(!G.over&&(t===1||G.demo))ai(t,dt);
   }
-  for(const u of G.units)if(!u.dead)updUnit(u,dt);
+  for(const u of G.units)if(!u.dead){const px=u.x,pz=u.z;updUnit(u,dt);if(!u.dead)depthWalk(u,px,pz,dt)}
   // separation of overlapping same-team units (small nudge in z)
   G.units=G.units.filter(u=>!u.dead);
   updProj(dt);
@@ -1282,7 +1296,8 @@ class PartSet{
   end(){for(const k in this.list){const p=this.list[k];p.m.count=p.n;p.m.instanceMatrix.needsUpdate=true;p.m.instanceColor.needsUpdate=true}}
 }
 let PS=null;
-function put(n,x,y,z,q,sx,sy,sz,col){const p=PS.list[n];if(p.n>=p.max)return;_v.set(x,y,z);_s.set(sx,sy,sz);_m4.compose(_v,q,_s);p.m.setMatrixAt(p.n,_m4);p.m.setColorAt(p.n,_c.setHex(col));p.n++}
+let UT=null;const UTM=new THREE.Matrix4(),_ry=new THREE.Matrix4(),_tv=new THREE.Vector3();
+function put(n,x,y,z,q,sx,sy,sz,col){const p=PS.list[n];if(p.n>=p.max)return;_v.set(x,y,z);_s.set(sx,sy,sz);_m4.compose(_v,q,_s);if(UT)_m4.premultiply(UT);p.m.setMatrixAt(p.n,_m4);p.m.setColorAt(p.n,_c.setHex(col));p.n++}
 function seg(n,a,b,rx,col,rz){_d.set(b[0]-a[0],b[1]-a[1],b[2]-a[2]);const L=_d.length()||1e-4;_d.multiplyScalar(1/L);_q.setFromUnitVectors(UP,_d);put(n,(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2,_q,rx,L,rz??rx,col)}
 function ball(n,p,r,col){put(n,p[0],p[1],p[2],QI,r,r,r,col)}
 // world point -> particle (sim) coordinates
@@ -1295,6 +1310,8 @@ function tierOf(u){return u.type==='boss'?3:(G&&G.tiers?G.tiers[u.team][u.type]|
 function unit3D(u,tier,main){
   const T=TYPES[u.type],s=T.size,d=u.dir,J=pose(u),tm=u.team,k=s*SC,t=G?G.t:0,gi=GI(u);
   const bx=u.x*SC,by=u.y*SC,bz=u.z*ZS;
+  if(u.yaw){UT=UTM.makeTranslation(bx,0,bz).multiply(_ry.makeRotationY(u.yaw)).multiply(_m4.makeTranslation(-bx,0,-bz))}else UT=null;
+  try{
   const P=(p,side)=>[bx+p[0]*d*k,by-p[1]*k,bz+side*k];
   const ink=u.flash>0?C.flash:u.type==='minion'?[0x2a1838,0x3a1020][tm]:C.ink[tm],acc=C.acc[tm],trim=C.trim[tm];
   const R=(gi?2.35:2.05)*k,hr=(gi?5.6:7.6)*k,sack=0x121010,crestC=[0xb3261e,0x1c0a0a][tm],bronze=0xb88a3e;
@@ -1412,6 +1429,7 @@ function unit3D(u,tier,main){
     else if(tr>=3){helm(0x55595e,1.12);for(const sg of [-1,1]){const b=[head[0],head[1]+hr*.5,head[2]+sg*hr*.8];seg('wcone',b,[b[0]+d*hr*.3,b[1]+hr*.9,b[2]+sg*hr*.9],hr*.28,C.ivory)}}
     else for(let i=0;i<5;i++){const a=Math.PI*(.15+i*.17);seg('limb',[head[0]+Math.cos(a)*hr*.8*-d,head[1]+Math.sin(a)*hr*.8,head[2]],[head[0]+Math.cos(a)*hr*1.35*-d,head[1]+Math.sin(a)*hr*1.35,head[2]],R*.35,ink)}
   }
+  }finally{UT=null}
 }
 
 function mixHex(a,b,t){const f=(sh)=>Math.round(((a>>sh)&255)+(((b>>sh)&255)-((a>>sh)&255))*t);return (f(16)<<16)|(f(8)<<8)|f(0)}
@@ -1436,7 +1454,7 @@ const TRMAX=1500,trPos=new Float32Array(TRMAX*3),trCol=new Float32Array(TRMAX*3)
 trG.setAttribute('position',new THREE.BufferAttribute(trPos,3).setUsage(THREE.DynamicDrawUsage));trG.setAttribute('color',new THREE.BufferAttribute(trCol,3).setUsage(THREE.DynamicDrawUsage));
 const trMesh=new THREE.Mesh(trG,new THREE.MeshBasicMaterial({vertexColors:true,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,side:THREE.DoubleSide,fog:false}));
 trMesh.frustumCulled=false;scene.add(trMesh);
-function trailPush(u,h,tip,strike,col){if(!(strike>0&&strike<1))return;let tr=trails.get(u.id);if(!tr){tr=[];trails.set(u.id,tr)}tr.push([h[0],h[1],h[2],tip[0],tip[1],tip[2],G.t,col])}
+function trailPush(u,h,tip,strike,col){if(!(strike>0&&strike<1))return;if(UT){h=_tv.set(...h).applyMatrix4(UT).toArray();tip=_tv.set(...tip).applyMatrix4(UT).toArray()}let tr=trails.get(u.id);if(!tr){tr=[];trails.set(u.id,tr)}tr.push([h[0],h[1],h[2],tip[0],tip[1],tip[2],G.t,col])}
 function buildTrails(){
   let n=0;const life=.14;
   const V=(p,o,r,g,b)=>{if(n>=TRMAX)return;trPos[n*3]=p[o];trPos[n*3+1]=p[o+1];trPos[n*3+2]=p[o+2];trCol[n*3]=r;trCol[n*3+1]=g;trCol[n*3+2]=b;n++};
