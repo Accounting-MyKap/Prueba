@@ -665,10 +665,9 @@ const wallSlot=u=>({x:-132-(u.id%4)*13-((u.id>>2)%2)*6,z:-18+((u.id>>2)%6)*7.2})
 function garrisonShoot(u){
   if(u.cd>0)return;
   const T=TYPES[u.type],team=u.team,fwd=team?-1:1,home=STATUE[team];
-  const n=nearestEnemy(u);if(!n||n.t.statue!==undefined||Math.abs(n.t.x-home)>(u.type==='mage'?effRange(u)+60:WALL_RANGE))return;
+  const n=nearestEnemy(u);if(!n||n.t.statue!==undefined||Math.abs(n.t.x-home)>WALL_RANGE)return;
   const sl=wallSlot(u),hx=home+fwd*(sl.x+6),z0=sl.z,hy=GROUND+z0-44;u.wallShot=G.t;
-  if(u.type==='mage'){u.cd=T.cd;lobFire(team,hx,hy,n.t.x,n.t.z,dmgOf(u).d,u.id,T.aoe*G.mods[team].aoe,z0);return}
-  const d=u.type==='archer'?dmgOf(u).d:10*(1+.12*u.rank);u.cd=u.type==='archer'?T.cd:2.1;
+  const d=u.type==='archer'?dmgOf(u).d:u.type==='mage'?16:10*(1+.12*u.rank);u.cd=u.type==='archer'?T.cd:2.1;
   fireArrow(team,hx,hy,n.t,d,u.id,u.type==='archer'&&tierOf(u)>=3,z0);sfx('bow',hx);
 }
 function nearestEnemy(u){
@@ -935,7 +934,7 @@ function soldierAI(u,dt){
     // raise the shield against giant blows and incoming missiles
     u.blkChk-=dt;if(u.blkChk<=0){u.blkChk=.15;const bd=blockThreat(u,n);if(bd){u.blockT=.55;u.dir=bd}}
     const wall=cmd===1&&!tg&&Math.abs(u.x-gx)<10;
-    u.block=u.blockT>0||wall;if(u.block)mspd=spd*.4;
+    u.block=u.blockT>0||wall;if(u.block)mspd=spd*.6;
   }
   if(tg){
     const dx=tg.x-u.x,d=Math.abs(dx)-radius(tg);const reach=range-((u.id%3)*3);
@@ -952,7 +951,7 @@ function soldierAI(u,dt){
 // Direction (+1/-1) to raise the shield toward, or 0 when there is nothing worth blocking
 function blockThreat(u,n){
   for(const o of G.units){if(o.team===u.team||o.dead||!GI(o)||o.atkT<0)continue;const dx=o.x-u.x;if(Math.abs(dx)<110&&o.atkT/TYPES[o.type].atk<TYPES[o.type].hitAt)return Math.sign(dx)||u.dir}
-  if(n&&n.d<effRange(u)+6)return 0;
+  if(n&&n.d<150)return 0; // close to the target: charge instead of turtling
   for(const p of G.proj){if(p.team===u.team||p.stuck||p.delay>0||p.k==='meteor')continue;const dx=p.x-u.x;if(Math.abs(dx)<170&&dx*p.vx<0)return Math.sign(dx)||u.dir}
   return 0;
 }
@@ -1144,6 +1143,7 @@ function pose(u){
         else{const e=ease((p-w-.12)/(1-w-.12));fa1=lerp(1.35,.55,e);fa2=lerp(.05,.55,e);wAng=lerp(2.05,Math.PI-.05,e);lean=lerp(.25,.03,e);step=(1-e)*6}}
       break;}
   }
+  if(u.type==='giant'||u.type==='boss'){lean+=.34;hipY+=3}
   const hip=[0,hipY];
   const neck=[Math.sin(lean)*22,hipY-Math.cos(lean)*22];
   const head=[neck[0]+Math.sin(lean)*9.5,neck[1]-Math.cos(lean)*9.5];
@@ -1230,7 +1230,7 @@ const SC=.1,ZS=.25,STZ=-9.5,MINEZ=-7.2;
 let VW=960,dpr=1,cssW=1,cssH=1;
 const hash=n=>{const x=Math.sin(n*127.1)*43758.5453;return x-Math.floor(x)};
 function vnoise(x,z){const xi=Math.floor(x),zi=Math.floor(z),xf=x-xi,zf=z-zi,u=xf*xf*(3-2*xf),v=zf*zf*(3-2*zf);const h=(a,b)=>hash(a*57.13+b*311.7);return lerp(lerp(h(xi,zi),h(xi+1,zi),u),lerp(h(xi,zi+1),h(xi+1,zi+1),u),v)}
-const C={ink:[0x1a1612,0x2c110f],acc:[0xe9b041,0xd6402d],trim:[0x3a6aa3,0x6b1d17],iron:0x8d949b,steel:0xd7dde3,gold:0xf2c14e,bronze:0xb8803e,
+const C={ink:[0x0d0c0b,0x4a0b0b],acc:[0xe9b041,0xd6402d],trim:[0x3a6aa3,0x6b1d17],iron:0x8d949b,steel:0xd7dde3,gold:0xf2c14e,bronze:0xb8803e,
   wood:0x6a4a2a,dark:0x2b1d12,leather:0x6b4a2a,flash:0xe6d9c2,ivory:0xe8dcc0,orb:[0x6fb9ff,0xff5a2a]};
 const hexA=(c,a)=>{a=clamp(a,0,1);return (Math.round(((c>>16)&255)*a)<<16)|(Math.round(((c>>8)&255)*a)<<8)|Math.round((c&255)*a)};
 
@@ -1297,21 +1297,21 @@ function unit3D(u,tier,main){
   const bx=u.x*SC,by=u.y*SC,bz=u.z*ZS;
   const P=(p,side)=>[bx+p[0]*d*k,by-p[1]*k,bz+side*k];
   const ink=u.flash>0?C.flash:u.type==='minion'?[0x2a1838,0x3a1020][tm]:C.ink[tm],acc=C.acc[tm],trim=C.trim[tm];
-  const R=(gi?1.8:1.5)*k,hr=(gi?7.5:6.8)*k;
+  const R=(gi?2.35:2.05)*k,hr=(gi?5.6:7.6)*k,sack=0x121010,crestC=[0xb3261e,0x1c0a0a][tm],bronze=0xb88a3e;
   const aimArm=(u.type==='archer'&&(J.draw>0||u.atkT>=0||u.charge>0))||gi;
   const bs=aimArm?1.2:-3.4;
   const hip=P(J.hip,0),neck=P(J.neck,0),head=P(J.head,0);
   const hipF=P(J.hip,2.4),hipB=P(J.hip,-2.4),kF=P(J.k0,2.4),fF=P(J.f0,2.4),kB=P(J.k1,-2.4),fB=P(J.f1,-2.4);
   const shF=P(J.sh,3.2),shB=P(J.sh,-3.2),eF=P(J.e0,3.4),hF=P(J.h0,3.6),eB=P(J.e1,bs),hB=P(J.h1,bs);
   // body
-  seg('limb',hip,neck,R*1.12,ink);ball('joint',neck,R*1.1,ink);
-  if(gi)put('joint',(hip[0]+neck[0])/2,(hip[1]+neck[1])/2-.4*k,bz,QI,R*2.3,R*2.6,R*2.1,ink);
+  seg('limb',hip,neck,R*1.15,ink);ball('joint',neck,R*1.12,ink);
+  if(gi){put('joint',neck[0]*.6+hip[0]*.4,neck[1]*.6+hip[1]*.4,bz,qL.setFromAxisAngle(ZAX,-J.lean*d),R*3.2,R*3.6,R*3.4,ink);put('joint',neck[0],neck[1]-1*k,bz,QI,R*2.6,R*2,R*3.2,ink)}
   ball('head',head,hr,ink);
   seg('limb',hipB,hipF,R*.9,ink);seg('limb',shB,shF,R*.85,ink);
   for(const [a,b,c] of [[hipF,kF,fF],[hipB,kB,fB],[shF,eF,hF],[shB,eB,hB]]){seg('limb',a,b,R,ink);seg('limb',b,c,R*.9,ink);ball('joint',b,R*.98,ink);ball('joint',c,R*1.05,ink)}
   ball('joint',hipF,R,ink);ball('joint',hipB,R,ink);ball('joint',shF,R,ink);ball('joint',shB,R,ink);
   if(main&&u.arrows&&u.arrows.length){const SD={hip:0,neck:0,head:0,sh:0,k0:2.4,f0:2.4,k1:-2.4,f1:-2.4,e0:3.4,h0:3.6,e1:bs,h1:bs};drawStuck(u.arrows,n=>P(J[n],SD[n]),d)}
-  if(tm===1||u.type==='minion')ball('glow',[head[0]+d*hr*.55,head[1]+hr*.12,head[2]+hr*.55],hr*.16,u.type==='minion'?C.orb[tm]:0xff7a5a);
+  if(u.type==='minion')ball('glow',[head[0]+d*hr*.55,head[1]+hr*.12,head[2]+hr*.55],hr*.16,C.orb[tm]);
   // gear
   qL.setFromAxisAngle(ZAX,-J.lean*d);
   const wv=[Math.sin(J.wAng)*d,-Math.cos(J.wAng),0],pv=[-wv[1],wv[0],0];
@@ -1327,10 +1327,9 @@ function unit3D(u,tier,main){
     const base=A(hF,wv,3),tip=A(hF,wv,L);
     seg('wcyl',A(hF,wv,-3.5),base,.7*k,C.dark);
     seg('mbox',base,tip,bw*k,blade,.4*k);
-    const gw=[3.5,4.5,5,6][tier];seg('mbox',A(base,pv,-gw),A(base,pv,gw),1*k,tier>=2?C.steel:tier?C.bronze:acc,1.3*k);
+    const gw=[3.5,4.5,5,6][tier];seg('mbox',A(base,pv,-gw),A(base,pv,gw),1*k,tier>=2?C.steel:tier?C.bronze:0x3a3530,1.3*k);
     if(tier>=3){seg('gcyl',A(base,wv,2),A(tip,wv,-1),.4*k,0xff9a3a);if(main&&Math.random()<.2)emit(tip,{k:'ember',vx:rnd(-20,20),vy:rnd(-50,-20),life:.5,sz:rnd(1.5,2.5)})}
     if(main)trailPush(u,hF,tip,J.strike,tier>=3?0xff9a3a:0xfff0d0);
-    if(tier<2){band(acc);tails(acc)}
     if(tier>=1)pauld(tier>=2?C.steel:C.leather,tier>=2);
     if(tier>=2){helm(tier>=3?C.gold:C.iron);seg('mbox',A(head,FW,6.3),A(A(head,FW,6.6),UPv,-4.5),.8*k,C.iron,.8*k)}
     if(tier>=3){const top=[head[0],head[1]+hr*1.05,head[2]];seg('wcone',A(top,FW,1),A(A(top,BK,12),UPv,2+Math.sin(t*8+u.id)),2.3*k,acc);cape(trim)}
@@ -1339,9 +1338,10 @@ function unit3D(u,tier,main){
     seg('wcyl',A(hF,wv,-3),tip,.75*k,C.wood);
     const pa=A(A(tip,pv,-8),wv,-1.5);seg('mcone',tip,pa,1.3*k,pc);seg('mcone',tip,A(tip,pv,6),1.1*k,pc);
     if(main)trailPush(u,hF,pa,J.strike,0xfff0d0);
-    if(tier===0)band(acc);
-    else{helm(0xd9a520,1.1);const lamp=A(A(head,FW,6.4),UPv,3);ball('glow',lamp,1.3*k,0xfff2b0);if(main&&nightF>.4)LIGHTS.push({p:lamp,col:0xfff2b0,i:.5,d:10})}
-    if(u.carry>0){const bsz=tier>=2?1.3:1,bp=A(A(neck,BK,7),UPv,-8);put('wball',bp[0],bp[1],bp[2],QI,6*k*bsz,6.5*k*bsz,5*k*bsz,C.leather);ball('glow',A(bp,UPv,5*bsz),2*k,0xffd65a)}
+    if(tier>=1){helm(0xd9a520,1.1);const lamp=A(A(head,FW,6.4),UPv,3);ball('glow',lamp,1.3*k,0xfff2b0);if(main&&nightF>.4)LIGHTS.push({p:lamp,col:0xfff2b0,i:.5,d:10})}
+    {const full=u.carry>0,bsz=(full?1:.55)*(tier>=2?1.2:1),bp=A(A(neck,BK,full?9:6),UPv,full?-10:-8),q=qB.setFromAxisAngle(ZAX,d*(full?.5:.2));
+      put('wball',bp[0],bp[1],bp[2]-.6*k,q,8*k*bsz,6.2*k*bsz,5.5*k*bsz,sack);const tie=A(A(bp,UPv,5.2*bsz),FW,2.5*bsz);seg('limb',tie,shB,.6*k,sack);ball('wball',tie,1.4*k,sack);
+      if(full)ball('glow',A(tie,UPv,.8),1.1*k,0xffd65a)}
     if(tier>=3&&main&&Math.random()<.06)emit(pa,{k:'gold',vx:rnd(-30,30),vy:rnd(-60,-20),life:.4});
   }else if(u.type==='archer'){
     const Rw=[14,17,17,18][tier]*k,bowC=[C.wood,C.wood,C.dark,C.gold][tier];
@@ -1352,9 +1352,8 @@ function unit3D(u,tier,main){
     const stc=tier>=3?0xffb060:0xe8dcc0;seg('gcyl',T1,sp,.22*k,stc);seg('gcyl',T2,sp,.22*k,stc);
     if(tier>=2){ball('mball',T1,.9*k,C.steel);ball('mball',T2,.9*k,C.steel)}
     if(drawing){const at=A(hF,wv,5);seg('wcyl',sp,at,.35*k,C.wood);seg('mcone',at,A(at,wv,3),.9*k,C.steel);if(tier>=3)ball('glow',A(at,wv,1.5),1.2*k,0xff8a3a)}
-    seg('wcone',A(head,FW,1.2),A(A(head,BK,12),UPv,3.5),hr*1.08,trim);
-    if(tier>=1){const qt=[neck[0]-d*5*k,neck[1]+3*k,bz-1.2*k],qb=[hip[0]-d*4*k,hip[1]+2*k,bz-1.2*k];seg('wcyl',qt,qb,2.2*k,C.leather);
-      _d.set(qt[0]-qb[0],qt[1]-qb[1],0).normalize();const dqx=_d.x,dqy=_d.y;for(let i=-1;i<=1;i++){const o=[qt[0]+i*.8*k,qt[1],qt[2]],e=[o[0]+dqx*5*k,o[1]+dqy*5*k,o[2]];seg('wcyl',o,e,.3*k,C.wood);ball('wball',e,.9*k,acc)}}
+    {const qt=[neck[0]-d*5*k,neck[1]+3*k,bz-1.2*k],qb=[hip[0]-d*4*k,hip[1]+2*k,bz-1.2*k];seg('wcyl',qt,qb,2.2*k,tier>=2?0x3a2a1c:C.leather);
+      _d.set(qt[0]-qb[0],qt[1]-qb[1],0).normalize();const dqx=_d.x,dqy=_d.y;for(let i=-1;i<=1;i++){const o=[qt[0]+i*.8*k,qt[1],qt[2]],e=[o[0]+dqx*5*k,o[1]+dqy*5*k,o[2]];seg('wcyl',o,e,.3*k,C.wood);seg('wbox',e,[e[0]+dqx*1.6*k,e[1]+dqy*1.6*k,e[2]],.15*k,tier>=3?0xff9a3a:0xe8dcc0,1.2*k)}}
     if(tier>=2)put('wball',neck[0]-d*.5*k,neck[1]-1*k,neck[2],QI,5*k,2.6*k,5*k,acc);
   }else if(u.type==='spear'){
     const L=[30,32,36,38][tier],metal=[C.bronze,C.bronze,C.steel,C.gold][tier];
@@ -1363,11 +1362,19 @@ function unit3D(u,tier,main){
     else if(!released){const base=A(hF,wv,2.5),tip=A(hF,wv,16);seg('wcyl',A(hF,wv,-3),base,.7*k,C.dark);seg('mbox',base,tip,2.4*k,tier>=3?C.gold:C.steel,.4*k);seg('mbox',A(base,pv,-3),A(base,pv,3),.9*k,metal,1.2*k);if(main)trailPush(u,hF,tip,J.strike,0xfff0d0)}
     const spare=u.ammo-(inHand?1:0);
     if(spare>0){const a=[hip[0]-d*7*k,hip[1]-6*k,bz-2.2*k],b=[neck[0]+d*5*k,neck[1]+18*k,bz-2.2*k];seg('wcyl',a,b,.7*k,C.wood);_d.set(b[0]-a[0],b[1]-a[1],0).normalize();seg('mcone',b,[b[0]+_d.x*7*k,b[1]+_d.y*7*k,b[2]],1.8*k,metal)}
-    helm(metal,1.14);const top=[head[0],head[1]+hr*1.1,head[2]];
-    seg('wcone',A(top,FW,2),A(A(top,BK,14+tier*2),UPv,-2+Math.sin(t*7+u.id)*1.2),2.4*k*(1+tier*.12),acc);
-    if(tier>=2){pauld(metal,true);seg('mbox',A(head,FW,6.2),A(A(head,FW,6.4),UPv,-5),1*k,metal,1.2*k)}
+    const hm=tier>=3?C.gold:tier>=2?C.steel:bronze;helm(hm,1.13);
+    for(const sg of [-1,1])put('mbox',head[0]+d*hr*.45,head[1]-hr*.35,head[2]+sg*hr*.72,qL,hr*.9,hr*.9,hr*.28,hm);
+    seg('mbox',A(head,UPv,1),A(A(head,FW,hr/k*1.02),UPv,-4),1.1*k,hm,1.1*k);
+    for(let i=0;i<9;i++){const a=Math.PI*(.12+i*.095),rr=hr*1.2,wob=Math.sin(t*7+u.id+i)*.25*k*(u.moving?1:.3);
+      put('wball',head[0]+Math.cos(a)*rr*d,head[1]+Math.sin(a)*rr+hr*.15+wob,head[2],qL,hr*.34,hr*.6,hr*.2,crestC)}
+    if(tier>=2)pauld(hm,true);
     const sc=[hB[0]+d*1*k,hB[1],bz+(u.block?4.5:5.5)*k],nx=d*(u.block?.9:.55),nz=u.block?.44:.84;eul.set(0,Math.atan2(-nz,nx),0);qB.setFromEuler(eul);
-    if(tier<3){const r=(9+tier*.6)*k;put('wdisc',sc[0],sc[1],sc[2],qB,1.4*k,r,r,trim);if(tier>=1)put('mdisc',sc[0]-nx*.4*k,sc[1],sc[2]-nz*.4*k,qB,1*k,r+1*k,r+1*k,metal);put('mball',sc[0]+nx*.9*k,sc[1],sc[2]+nz*.9*k,QI,2*k,2*k,2*k,acc)}
+    if(tier<3){const r=(9.5+tier*.6)*k,rim=tier>=2?C.steel:bronze;
+      put('mdisc',sc[0],sc[1],sc[2],qB,1.3*k,r,r,rim);
+      put('wdisc',sc[0]+nx*.45*k,sc[1],sc[2]+nz*.45*k,qB,.6*k,r*.8,r*.8,[0x8a1a14,0x2a0a0a][tm]);
+      put('mdisc',sc[0]+nx*.75*k,sc[1],sc[2]+nz*.75*k,qB,.6*k,r*.55,r*.55,rim);
+      put('wdisc',sc[0]+nx*1*k,sc[1],sc[2]+nz*1*k,qB,.5*k,r*.3,r*.3,[0x8a1a14,0x2a0a0a][tm]);
+      put('mball',sc[0]+nx*1.2*k,sc[1],sc[2]+nz*1.2*k,QI,1.6*k,1.6*k,1.6*k,rim)}
     else{put('mbox',sc[0],sc[1]-2*k,sc[2],qB,1.6*k,24*k,14*k,C.gold);put('wbox',sc[0]+nx*.9*k,sc[1]-2*k,sc[2]+nz*.9*k,qB,.3*k,20*k,4*k,trim);cape(trim)}
   }else if(u.type==='mage'){
     const top=A(hF,wv,30),oc=C.orb[tm],orr=(3.5+J.glow*3)*k*(tier>=2?1.25:1);
@@ -1380,21 +1387,25 @@ function unit3D(u,tier,main){
     if(tier>=1)seg('wcone',A(hip,UPv,-14),A(neck,UPv,-3),8.5*k,tier>=3?0x3b2a5a:trim);
     if(tier>=3)put('band',hip[0],hip[1]-12*k,hip[2],QI,8.3*k,3*k,8.3*k,C.gold);
     if(tier>=2)put('wball',neck[0],neck[1]-1*k,neck[2],QI,5*k,2.6*k,5*k,acc);
-    const br=[head[0],head[1]+hr*.55,head[2]];put('wcyl',br[0],br[1],br[2],qL,hr*1.8,.6*k,hr*1.8,trim);
-    seg('wcone',br,[head[0]-d*hr*1.2+Math.sin(t*3+u.id)*.3*k,head[1]+hr*(3+tier*.25),head[2]],hr*1.05,trim);
-    if(tier>=2)put('band',br[0],br[1]+.8*k,br[2],qL,hr*1.02,hr*.9,hr*1.02,acc);
+    const hatC=tier>=3?0x3b2a5a:tier>=1?trim:[0x2c2a33,0x3a0c0c][tm],br=[head[0],head[1]+hr*.45,head[2]];
+    put('wcyl',br[0],br[1],br[2],qL,hr*1.55,.55*k,hr*1.55,hatC);
+    const mid=[head[0]-d*hr*.25,head[1]+hr*2.1,head[2]],tipH=[head[0]-d*hr*1.5+Math.sin(t*3+u.id)*.3*k,head[1]+hr*2.9,head[2]];
+    seg('wcone',br,mid,hr*.95,hatC);seg('wcone',[mid[0]+d*hr*.12,mid[1]-hr*.35,mid[2]],tipH,hr*.42,hatC);
+    if(tier>=2)put('band',br[0],br[1]+.8*k,br[2],qL,hr*.96,hr*.9,hr*.96,acc);
+    const chin=[head[0]+d*hr*.45,head[1]-hr*.35,head[2]];seg('wcone',chin,[chin[0]+d*1.5*k,chin[1]-13*k,chin[2]],hr*.62,0xd8d2c4);
+    seg('wcyl',top,A(A(top,wv,4),pv,-3),.8*k,tier>=3?C.dark:C.wood);
   }else if(u.type==='minion'){
     const base=A(hF,wv,2),tip=A(hF,wv,15);seg('mbox',base,tip,1.6*k,0x5a5560,.4*k);if(main)trailPush(u,hF,tip,J.strike,C.orb[tm]);
     for(let i=0;i<3;i++){const a=Math.PI*(.2+i*.3);seg('limb',[head[0]-d*Math.cos(a)*hr*.8,head[1]+Math.sin(a)*hr*.8,head[2]],[head[0]-d*Math.cos(a)*hr*1.4,head[1]+Math.sin(a)*hr*1.3,head[2]],R*.3,ink)}
   }else{
     const tr=u.type==='boss'?3:tier,tip=A(hF,wv,26);
     if(tr<=1){seg('taper',A(hF,wv,-4),tip,2.8*k,C.wood);
-      if(tr===1)for(let i=0;i<6;i++){const a=i*1.047,dir=[pv[0]*Math.cos(a),pv[1]*Math.cos(a),Math.sin(a)],b=A(tip,wv,-3-(i%2)*4);seg('mcone',A(b,dir,1.8),A(b,dir,5.2),.9*k,C.iron)}}
+      for(let i=0;i<(tr?8:5);i++){const a=i*1.047,dir=[pv[0]*Math.cos(a),pv[1]*Math.cos(a),Math.sin(a)],b=A(tip,wv,-3-(i%2)*4);seg('mcone',A(b,dir,1.8),A(b,dir,5.2),.9*k,tr?C.iron:0xd8ccb0)}}
     else{seg('wcyl',A(hF,wv,-5),tip,1.1*k,C.dark);const hs=tr===2?6:8;
       seg(tr===2?'rock':'mbox',A(tip,pv,-hs),A(tip,pv,hs),(tr===2?6:7.5)*k,tr===2?0x8a8580:0x55595e,(tr===2?6:7.5)*k);
       if(tr>=3){for(const sg of [-1,1]){const e=A(tip,pv,sg*hs);seg('mcone',e,A(e,pv,sg*5),2*k,C.steel)}seg('gcyl',A(tip,wv,-4),A(tip,wv,4),.6*k,0xff7a3a,8.2*k)}}
     if(main)trailPush(u,hF,tip,J.strike,0xfff0d0);
-    put('band',hip[0],hip[1]+2*k,hip[2],QI,4.6*k,2.5*k,4.6*k,acc);
+    put('band',hip[0],hip[1]+2*k,hip[2],QI,4.8*k,2.5*k,4.8*k,0x3a2a1c);
     if(tr>=2)pauld(tr>=3?C.iron:C.leather,tr>=3);
     if(u.type==='boss'){put('mcyl',head[0],head[1]+hr*.85,head[2],qL,hr*.9,hr*.45,hr*.9,C.gold);
       for(let i=0;i<5;i++){const a=i*1.2566,b=[head[0]+Math.cos(a)*hr*.8,head[1]+hr*1.05,head[2]+Math.sin(a)*hr*.8];seg('mcone',b,[b[0],b[1]+hr*.5,b[2]],hr*.16,C.gold)}cape(0x7a1a14)}
@@ -1411,13 +1422,13 @@ function drawStuck(list,Pp,dir){
 }
 function ragdoll3D(r){
   const a=clamp((9-r.t)/2.5,0,1);if(a<=0)return;
-  const s=r.s,sink=(1-a)*1.2*s,gi=r.type==='giant'||r.type==='boss',R=(gi?1.8:1.5)*s*SC,ink=GORE?mixHex(C.ink[r.team],0x4a0a08,Math.min(.28,r.t/8)):C.ink[r.team];
+  const s=r.s,sink=(1-a)*1.2*s,gi=r.type==='giant'||r.type==='boss',R=(gi?2.35:2.05)*s*SC,ink=GORE?mixHex(C.ink[r.team],0x4a0a08,Math.min(.28,r.t/8)):C.ink[r.team];
   if(r.pool&&r.pool.r>.5){const rr=r.pool.r*SC;put('decal',r.pts.hip.x*SC,.037,r.z*ZS,QI,rr*1.9,1,rr*.62,0x520a07)}
   const side={e0:3.4,h0:3.6,k0:2.4,f0:2.4,e1:-3.4,h1:-3.6,k1:-2.4,f1:-2.4};
   const Q={};for(const k in r.pts){const p=r.pts[k];Q[k]=[p.x*SC,(r.gy-p.y)*SC-sink,r.z*ZS+(side[k]||0)*s*SC]}
   for(const [A_,B_] of RD_LINKS){if(A_==='head'&&B_==='hip')continue;if(A_==='neck'&&B_==='sh')continue;seg('limb',Q[A_],Q[B_],R,ink);ball('joint',Q[B_],R,ink)}
   if(r.arrows&&r.arrows.length)drawStuck(r.arrows,k=>Q[k],r.dir);
-  const hr=(gi?7.5:6.8)*s*SC;ball('head',Q.head,hr,ink);put('band',Q.head[0],Q.head[1],Q.head[2],QI,hr*1.05,hr*1.3,hr*1.05,C.acc[r.team]);
+  const hr=(gi?5.6:7.6)*s*SC;ball('head',Q.head,hr,ink);
 }
 
 // ── sword trails (additive ribbons)
@@ -1714,7 +1725,7 @@ function render3D(dt){
   for(const u of G.units){
     if(u.hidden){
       if(!G.teams[u.team].statue.hp)continue;
-      const sl=wallSlot(u),fw=u.team?-1:1,ty=u.type==='mage'?'mage':'archer';
+      const sl=wallSlot(u),fw=u.team?-1:1,ty='archer';
       const fk=GARF.get(u.id)||{id:u.id,team:u.team,y:0,phase:0,moving:false,rank:0,flash:0,dash:0,carry:0,charge:0,state:'idle',mineT:0,hidden:false,ammo:0,block:false};GARF.set(u.id,fk);
       Object.assign(fk,{type:ty,x:STATUE[u.team]+fw*sl.x,z:sl.z,dir:fw,aim:.32});
       const since=G.t-(u.wallShot??-9),atk=TYPES[ty].atk,ha=TYPES[ty].hitAt*atk;

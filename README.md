@@ -4,6 +4,17 @@ Juego de estrategia en tiempo real inspirado en *Stick War: Legacy*, en 3D, hech
 
 Abre `index.html` en el navegador para jugar (necesita conexión para descargar Three.js y las fuentes).
 
+## Diseño de las unidades
+
+Inspirado en el original: palitos de extremidades gruesas y redondeadas con cabeza grande. Tu ejército es negro y las naciones enemigas son granate.
+
+- **Minero:** pico y un gran saco negro a la espalda que se infla al cargar oro.
+- **Espadachín:** palito liso con espada (las mejoras añaden hombreras, yelmo y capa).
+- **Arquero:** arco y carcaj con flechas a la espalda.
+- **Lancero:** casco corintio de bronce con cresta roja de lado a lado, escudo redondo de bronce con anillos rojos y lanza larga.
+- **Mago:** sombrero puntiagudo doblado, barba gris larga y bastón.
+- **Gigante:** encorvado, con hombros enormes, cabeza pequeña y garrote con púas.
+
 ## 3D
 
 - Terreno con relieve, bosques, montañas con niebla atmosférica, nubes y cielo con sol, luna y estrellas.
@@ -34,7 +45,7 @@ La bola de fuego sigue un arco de mortero (unos 45–50°) y cae en el carril de
 
 ## Guarnición
 
-Detrás de cada estatua hay una empalizada de lanzas afiladas. Con la orden *Guarnición* todas las tropas se retiran detrás de ella, se curan, no pueden ser atacadas y disparan como arqueros (los mineros incluidos, como en el original). Los arqueros disparan con su daño normal y alcance de 560 px, los magos lanzan bolas de fuego, y el resto dispara flechas más débiles. La IA también se refugia cuando una fuerza mayor llega a sus puertas.
+Detrás de cada estatua hay una empalizada de lanzas afiladas. Con la orden *Guarnición* todas las tropas se retiran detrás de ella, se curan, no pueden ser atacadas y disparan como arqueros (mineros y magos incluidos, como en el original). Los arqueros disparan con su daño normal y alcance de 560 px; el resto dispara flechas más débiles. La IA también se refugia cuando una fuerza mayor llega a sus puertas.
 
 ## Sangre y muertes
 
