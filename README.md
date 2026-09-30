@@ -11,6 +11,22 @@ Abre `index.html` en el navegador para jugar (necesita conexión para descargar 
 - Los palitos son esqueletos 3D (cilindros y esferas instanciados) que usan las mismas animaciones: IK en las piernas, estelas de arma y ragdolls.
 - Cuatro vistas de cámara (`V` o el botón de cámara): clásica, cercana, épica y aérea. Rueda para zoom y clic derecho + arrastrar para girar.
 
+## Lanceros
+
+Inspirados en los espartanos de *300*:
+
+- **Lanzamiento:** al ver un enemigo a media distancia lanzan su lanza (60 de daño, atraviesa 2 enemigos). Después siguen con una espada corta más rápida.
+- **Recuperar la lanza:** la lanza queda clavada en el suelo; pasar sobre ella la recoge, y al volver a la estatua se rearman. Las lanzas propias en el suelo se marcan con un anillo dorado.
+- **Escudo:** bloqueando de frente reciben ~30% del daño normal (las flechas casi nada; la magia, 60%). Por la espalda no protege. No pueden atacar mientras bloquean y se mueven más lento.
+- **IA:** levantan el escudo ante el golpe de un gigante o cuando les llueven flechas, y con la orden *Defender* forman un muro de escudos.
+- **Control directo:** clic o `Espacio` lanza la lanza hacia el cursor si no hay nadie al alcance (si lo hay, ataca cuerpo a cuerpo). Mantén `S` o `↓` (botón 🛡 en el móvil) para bloquear.
+
+## Poderes y visión
+
+Lluvia de flechas y Meteoro solo se pueden lanzar donde tus tropas ven: cerca de tu estatua o a menos de ~340 px de una de tus unidades. El minimapa oscurece lo que no ves y el círculo de apuntado se pone rojo fuera de la visión. La IA sigue la misma regla, así que no puede bombardear tus minas sin acercarse.
+
+Si un bando se queda sin mineros y sin oro para entrenar uno, su estatua envía un minero de reserva cada 12 segundos para que la economía pueda recuperarse.
+
 ## Forja: armas y armaduras
 
 Las mejoras de unidad de la Armería cambian el aspecto de la tropa en cada nivel además de subir sus estadísticas:
@@ -20,7 +36,7 @@ Las mejoras de unidad de la Armería cambian el aspecto de la tropa en cada nive
 | Minero | Casco con lámpara | Pico de acero y bolsa grande | Pico de oro |
 | Espada | Hoja de acero y hombrera | Yelmo de hierro | Filo de brasa y capa: los golpes queman |
 | Arquero | Arco largo y carcaj | Arco recurvo y manto | Arco dorado: flechas de fuego que queman |
-| Lancero | Escudo con aro de metal | Yelmo cerrado y hombreras | Escudo torre dorado: 25% de bloquear golpes |
+| Lancero | Lanza perforante (atraviesa 3) y escudo con aro | Doble lanza, yelmo cerrado y hombreras | Escudo torre dorado: bloquea 85% y devuelve las flechas |
 | Mago | Túnica | Cristal arcano | Orbes guardianes |
 | Gigante | Garrote con púas | Martillo de piedra | Mazo de hierro y casco con cuernos |
 
@@ -85,6 +101,7 @@ La **escaramuza** sigue disponible con todo desbloqueado, sin mejoras y con 3 di
 | Minero controlado | Pica junto a una mina con `Espacio` o clic y lleva la bolsa a tu estatua para entregar el oro |
 | `A` `D` / flechas | Mover unidad o cámara |
 | `W` · `Shift` | Saltar · Esquivar |
+| `S` / `↓` | Bloquear con el escudo (lancero controlado) |
 | `Espacio` / clic | Atacar (mantén para cargar el arco) |
 | `Esc` | Soltar la unidad / cancelar poder |
 | `V` | Cambiar vista de cámara |
