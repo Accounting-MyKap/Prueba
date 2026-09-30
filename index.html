@@ -236,6 +236,24 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
 @media (orientation:portrait) and (max-width:600px){
   #rotHint{display:block;position:absolute;left:10px;right:10px;bottom:96px;z-index:4;text-align:center;background:rgba(19,16,13,.85);border:1px solid var(--line);border-radius:5px;padding:4px 8px;font-size:13px;color:var(--muted);pointer-events:none}
 }
+.tag-short,.touch-help{display:none}
+.inmenu #deck,.inmenu #hud,.inmenu #rotHint,.inmenu #toast{display:none}
+.or-sk{color:var(--muted);font-size:16px;margin-left:8px}
+details.more{margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
+details.more summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:17px;padding:6px 0;list-style-position:inside}
+details.more[open] summary{margin-bottom:10px}
+@media (pointer:coarse),(max-width:640px),(max-height:520px){
+  #menu .panel{padding:16px 18px}
+  #menu h1{font-size:clamp(36px,9vw,56px)}
+  .tag-long,#menu .hint{display:none}
+  .tag-short{display:block;margin:6px 0 12px;font-size:17px}
+  .menu-row{margin-top:8px;gap:8px}
+  .menu-row #btnCamp{flex:1 1 100%;padding:14px;font-size:22px}
+  .or-sk{flex:1 1 100%;margin:4px 0 0;font-size:14px}
+  .menu-row .seg button{padding:9px 12px}
+  .touch-help{display:block;margin-bottom:12px}
+  #menuMore .cols .keys,#menuMore .cols>div:last-child{display:none}
+}
 @media (prefers-reduced-motion:reduce){.card.shake{animation:none}#toast{transition:none}}
 </style>
 </head>
@@ -288,7 +306,26 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
     <div class="overlay" id="menu">
       <div class="panel">
         <h1>Guerra de <em>Varas</em></h1>
-        <p class="tag">Estrategia de palitos en tiempo real, ahora en 3D. Extrae oro, entrena tu ejército y derriba la estatua del Caos. Toma el control de cualquier soldado cuando la batalla lo pida.</p>
+        <p class="tag tag-long">Estrategia de palitos en tiempo real, ahora en 3D. Extrae oro, entrena tu ejército y derriba la estatua del Caos. Toma el control de cualquier soldado cuando la batalla lo pida.</p>
+        <p class="tag tag-short">Entrena tu ejército y derriba la estatua enemiga.</p>
+        <div class="row menu-row">
+          <button class="big" id="btnCamp">Campaña</button>
+          <span class="or-sk">o escaramuza libre:</span>
+          <div class="seg" id="diffSeg" role="group" aria-label="Dificultad">
+            <button data-d="facil">Fácil</button><button data-d="normal" class="on">Normal</button><button data-d="dificil">Difícil</button>
+          </div>
+          <button class="ghost" id="btnPlay">Escaramuza</button>
+          <button class="ghost goreBtn" type="button" aria-pressed="true">Sangre: Sí</button>
+        </div>
+        <details class="more" id="menuMore"><summary>Novedades y controles</summary>
+        <div class="touch-help">
+          <h2>Cómo se juega</h2>
+          <ul class="news">
+            <li><b>Toca las cartas de abajo</b> para entrenar unidades; los mineros traen el oro.</li>
+            <li><b>Defender / Atacar</b> mueve a todo tu ejército.</li>
+            <li><b>Toca un soldado</b> para controlarlo con el joystick y ⚔.</li>
+          </ul>
+        </div>
         <div class="cols">
           <div>
             <h2>Novedades</h2>
@@ -323,16 +360,8 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
             </dl>
           </div>
         </div>
-        <div class="row">
-          <button class="big" id="btnCamp">Campaña</button>
-          <span style="color:var(--muted);font-size:16px;margin-left:8px">o escaramuza libre:</span>
-          <div class="seg" id="diffSeg" role="group" aria-label="Dificultad">
-            <button data-d="facil">Fácil</button><button data-d="normal" class="on">Normal</button><button data-d="dificil">Difícil</button>
-          </div>
-          <button class="ghost" id="btnPlay">Escaramuza</button>
-          <button class="ghost goreBtn" type="button" aria-pressed="true">Sangre: Sí</button>
-        </div>
-        <p class="hint">Detrás se juega una batalla de demostración. Mejor en horizontal en el teléfono.</p>
+        </details>
+        <p class="hint">Detrás se juega una batalla de demostración.</p>
       </div>
     </div>
 
@@ -2016,6 +2045,7 @@ function ui(dt){
   document.querySelectorAll('#abils .cmd').forEach(b=>{const kx=b.dataset.a;b.querySelector('.cd').style.height=(tm.cool[kx]/ABIL[kx].cd*100)+'%';b.classList.toggle('poor',tm.mana<ABIL[kx].mana);b.classList.toggle('aim',aiming===kx)});
   const cu=G.ctrl!==null?G.units.find(u=>u.id===G.ctrl):null;
   $('#ctrlTag').hidden=!cu;if(cu)setTxt('ctrlName',TYPES[cu.type].n+(cu.rank?' '+'★'.repeat(cu.rank):'')+(cu.type==='miner'?` · bolsa ${Math.round(cu.carry)} oro`:cu.type==='spear'?(cu.ammo>0?` · lanzas ${cu.ammo}`:' · espada'):''));
+  document.body.classList.toggle('inmenu',mode==='menu');
   $('#aimBar').hidden=!aiming;$('#rotOv').hidden=!(coarse&&!rotDismissed&&mode==='play'&&!G.demo&&innerHeight>innerWidth*1.15);
   $('#pad').hidden=!(cu&&coarse);document.body.classList.toggle('ctrlmode',!!(cu&&coarse));$('#padBlock').hidden=!(cu&&(cu.type==='spear'||cu.type==='sword'||cu.type==='minion'));$('#padSpecial').hidden=!(cu&&(cu.type==='spear'||cu.type==='mage'));if(cu)setTxt('padSpecial',cu.type==='spear'?'🎯':'✦');
   $('#timerChip').hidden=!G.survive;if(G.survive)setTxt('timer',fmt(Math.max(0,G.survive-G.t)));
@@ -2096,6 +2126,7 @@ document.querySelectorAll('.acts [data-k]').forEach(b=>{b.addEventListener('poin
 let followMode=false;
 $('#btnFollow').addEventListener('click',()=>{followMode=!followMode;$('#btnFollow').setAttribute('aria-pressed',String(followMode));$('#btnFollow').style.color=followMode?'var(--gold)':'';toast(followMode?'La cámara sigue a tu primera línea':'Cámara libre')});
 $('#btnFull').addEventListener('click',async()=>{try{if(!document.fullscreenElement){await document.documentElement.requestFullscreen({navigationUI:'hide'});try{await screen.orientation.lock('landscape')}catch(e){}}else await document.exitFullscreen()}catch(e){toast('Tu navegador no permite pantalla completa aquí')}});
+if(!coarse&&innerWidth>640&&innerHeight>520)$('#menuMore').open=true;
 let rotDismissed=false;$('#rotDismiss').addEventListener('click',()=>{rotDismissed=true;$('#rotOv').hidden=true});
 $('#aimCancel').addEventListener('click',()=>{aiming=null});
 const KEYMAP={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down'};
