@@ -638,7 +638,11 @@ function dropWeapon(u,dir){
 }
 function kill(u,src,dir,o){
   u.dead=true;
-  makeRagdoll(u,dir,o.boom?1.8:(o.kb||35)>80?1.4:1,o);dropWeapon(u,dir);
+  const melee=src&&src.type&&!o.proj&&!o.arrow&&!o.boom;
+  let kind=o.boom?'blast':o.arrow?'arrow':src&&GI(src)&&!o.proj?'slam':'collapse';
+  if(melee&&!GI(src)&&GORE&&!GI(u)&&(src.type==='sword'||src.type==='minion'||src.type==='spear'&&src.ammo<=0)&&(o.crit||Math.random()<.35))kind='behead';
+  else if(melee&&src.type==='spear')kind='impale';
+  makeRagdoll(u,dir,kind==='blast'?1.8:kind==='slam'?1.5:kind==='impale'?.9:1,{...o,kind});dropWeapon(u,dir);
   if(GORE)blood(u.x,GROUND+u.z-u.y-30*TYPES[u.type].size,dir,16,GROUND+u.z);
   if(src&&!src.dead&&src.team!==undefined&&src.team!==u.team&&src.type){
     src.xp+=TYPES[u.type].cost/125;
@@ -760,7 +764,7 @@ function doHit(u){
     hits.sort((a,b)=>a[0]-b[0]);hits=hits.slice(0,u.type==='sword'?2:1).map(h=>h[1]);
     const e=1-u.team;if(!hits.length&&Math.abs(STATUE[e]-u.x)-44<reach&&G.teams[e].statue.hp>0)hits=[statueObj(e)];
   }else{const tg=getRef(u.tgt);if(tg&&Math.abs(tg.x-u.x)-radius(tg)<=reach&&(tg.statue!==undefined||Math.abs(tg.z-u.z)<=LANE+2))hits=[tg]}
-  for(const tg of hits){hurt(tg,d,u,{kb:u.type==='spear'?90:crit?140:40,up:crit?160:0});sfx('hit',u.x)}
+  for(const tg of hits){hurt(tg,d,u,{kb:u.type==='spear'?90:crit?140:40,up:crit?160:0,crit});sfx('hit',u.x)}
 }
 function area(team,x,r,d,src,o){
   for(const u of G.units){if(u.team===team||u.dead||u.hidden)continue;const dd=Math.abs(u.x-x);if(dd<r+radius(u)){hurt(u,d*(1-.4*dd/(r+10)),src,{...o,fromX:x})}}
@@ -1227,11 +1231,20 @@ function makeRagdoll(u,dir,power,o={}){
     const x=bx+J[k][0]*u.dir*s,y=by+J[k][1]*s;
     const up=(k==='head'||k==='neck'||k==='sh')?1:k==='hip'?.6:.3;
     let vx=dir*rnd(90,190)*power*up/Math.sqrt(s)+rnd(-20,20),vy=-rnd(80,200)*power*up/Math.sqrt(s);
+    const K=o.kind;
     if(arrowDeath){if(k==='head'||k==='neck'||k==='sh'){vx=dir*rnd(50,95);vy=-rnd(10,50)}else if(k==='hip'){vx=dir*rnd(15,35);vy=rnd(0,20)}else if(k==='k0'||k==='k1'){vx=-dir*rnd(30,70);vy=-rnd(0,30)}else{vx=rnd(-10,10);vy=0}}
+    else if(K==='collapse'||K==='behead'){ // knees buckle, torso tips over away from the blow
+      if(k==='head'||k==='neck'||k==='sh'){vx=dir*rnd(80,130);vy=-rnd(0,20)}else if(k==='hip'){vx=dir*rnd(10,25);vy=rnd(40,70)}else if(k==='k0'||k==='k1'){vx=-dir*rnd(40,80);vy=rnd(0,25)}else if(k[0]==='h'||k[0]==='e'){vx=rnd(-40,40);vy=-rnd(20,70)}else{vx=rnd(-10,10);vy=0}}
+    else if(K==='impale'){ // lifted onto the spear and thrown back
+      if(k==='hip'||k==='neck'||k==='sh'){vx=dir*rnd(150,210);vy=-rnd(90,140)}else{vx=dir*rnd(80,140);vy=-rnd(20,80)}}
+    if(K==='behead'&&k==='head'){vx=dir*rnd(60,140)+rnd(-30,30);vy=-rnd(230,330)}
+    if(K==='blast'&&(k==='e0'||k==='h0')){vx=dir*rnd(250,400)+rnd(-60,60);vy=-rnd(250,400)}
     pts[k]={x,y,px:x-vx*dt,py:y-vy*dt};
   }
-  const links=RD_LINKS.map(([a,b])=>[a,b,Math.hypot(pts[a].x-pts[b].x,pts[a].y-pts[b].y)]);
-  G.ragdolls.push({pts,links,team:u.team,type:u.type,s,dir:u.dir,gy:GROUND+u.z,z:u.z,t:0,acc:0,wAng:J.wAng,rank:u.rank,arrows:u.arrows||[],pool:GORE?{r:0,max:(8+rnd(0,6))*s*(GI(u)?1.3:1)}:null});
+  const cut=o.kind==='behead'?['head']:o.kind==='blast'&&GORE&&Math.random()<.6?['e0']:[];
+  const links=RD_LINKS.filter(([a,b])=>!(o.kind==='behead'&&(a==='head'||b==='head'))&&!(cut[0]==='e0'&&a==='sh'&&b==='e0')).map(([a,b])=>[a,b,Math.hypot(pts[a].x-pts[b].x,pts[a].y-pts[b].y)]);
+  if(o.kind==='slam'){for(const k in pts){pts[k].py=pts[k].y+rnd(1.5,3)}}
+  G.ragdolls.push({pts,links,team:u.team,type:u.type,s,dir:u.dir,gy:GROUND+u.z,z:u.z,t:0,acc:0,wAng:J.wAng,rank:u.rank,kind:o.kind,cut,spurt:GORE&&(o.kind==='behead'||cut.length)?1.3:0,char:o.kind==='blast',spin:rnd(-12,12),arrows:u.arrows||[],pool:GORE?{r:0,max:(8+rnd(0,6))*s*(GI(u)?1.3:1)}:null});
   if(G.ragdolls.length>70)G.ragdolls.shift();
 }
 function updRagdolls(dt){
@@ -1240,13 +1253,15 @@ function updRagdolls(dt){
     r.t+=dt;r.acc+=dt;
     while(r.acc>=h){r.acc-=h;if(r.t>3.5)continue;
       for(const k in r.pts){const p=r.pts[k];const vx=(p.x-p.px)*.992,vy=(p.y-p.py)*.992;p.px=p.x;p.py=p.y;p.x+=vx;p.y+=vy+GRAV*1.3*h*h;
-        if(p.y>r.gy){p.y=r.gy;p.px=p.x-(p.x-p.px)*.55;p.py=p.y+(p.y-p.py)*.25}}
+        const fl=k==='head'?r.gy-7*r.s:r.gy-1.5*r.s;if(p.y>fl){p.y=fl;p.px=p.x-(p.x-p.px)*(k==='head'?.8:.55);p.py=p.y+(p.y-p.py)*(k==='head'?.45:.25)}}
       for(let it=0;it<5;it++)for(const [a,b,L] of r.links){const A=r.pts[a],B=r.pts[b];const dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy)||.001,k=(d-L)/d*.5;A.x+=dx*k;A.y+=dy*k;B.x-=dx*k;B.y-=dy*k}
     }
   }
+  for(const r of G.ragdolls){if(r.spurt>0){r.spurt-=dt;const n=r.cut[0]==='head'?r.pts.neck:r.pts.sh;if(Math.random()<dt*40){const up=Math.max(.3,r.spurt);part({k:'blood',z:r.z,x:n.x,y:n.y,vx:r.dir*rnd(10,90)*up+rnd(-30,30),vy:-rnd(120,260)*up,life:1.5,sz:rnd(1.5,3),gy:r.gy})}}
+    if(r.cut[0]==='head')r.hrot=(r.hrot||0)+dt*r.spin*(r.pts.head.y<r.gy-1?1:.2);}
   for(const r of G.ragdolls){if(r.pool&&r.t>1)r.pool.r=Math.min(r.pool.max,r.pool.r+dt*r.pool.max/3);
-    if(r.t>=9&&r.pool&&r.pool.r>1&&G.decals.length<320)G.decals.push({k:'pool',x:r.pts.hip.x,y:r.gy,r:r.pool.r,a:1})}
-  G.ragdolls=G.ragdolls.filter(r=>r.t<9);
+    if(r.t>=15&&r.pool&&r.pool.r>1&&G.decals.length<320)G.decals.push({k:'pool',x:r.pts.hip.x,y:r.gy,r:r.pool.r,a:1})}
+  G.ragdolls=G.ragdolls.filter(r=>r.t<15);
 }
 
 // ───────────────────────── fx update ─────────────────────────
@@ -1476,14 +1491,18 @@ function drawStuck(list,Pp,dir){
     seg('wcyl',[px+dx*.15,py+dy*.15,pz],tail,.045,C.wood);seg('wbox',tail,[tail[0]+dx*.4,tail[1]+dy*.4,pz],.03,C.acc[ar.team],.22);if(ar.f)ball('glow',tail,.1,0xff8a3a)}
 }
 function ragdoll3D(r){
-  const a=clamp((9-r.t)/2.5,0,1);if(a<=0)return;
-  const s=r.s,sink=(1-a)*1.2*s,gi=r.type==='giant'||r.type==='boss',R=(gi?2.35:2.05)*s*SC,ink=GORE?mixHex(C.ink[r.team],0x4a0a08,Math.min(.28,r.t/8)):C.ink[r.team];
+  const a=clamp((15-r.t)/2.5,0,1);if(a<=0)return;
+  const s=r.s,sink=(1-a)*1.2*s,gi=r.type==='giant'||r.type==='boss',R=(gi?2.35:2.05)*s*SC,ink=r.char?0x1a1410:GORE?mixHex(C.ink[r.team],0x4a0a08,Math.min(.28,r.t/8)):C.ink[r.team];
   if(r.pool&&r.pool.r>.5){const rr=r.pool.r*SC;put('decal',r.pts.hip.x*SC,.037,r.z*ZS,QI,rr*1.9,1,rr*.62,0x520a07)}
   const side={e0:3.4,h0:3.6,k0:2.4,f0:2.4,e1:-3.4,h1:-3.6,k1:-2.4,f1:-2.4};
   const Q={};for(const k in r.pts){const p=r.pts[k];Q[k]=[p.x*SC,(r.gy-p.y)*SC-sink,r.z*ZS+(side[k]||0)*s*SC]}
-  for(const [A_,B_] of RD_LINKS){if(A_==='head'&&B_==='hip')continue;if(A_==='neck'&&B_==='sh')continue;seg('limb',Q[A_],Q[B_],R,ink);ball('joint',Q[B_],R,ink)}
+  for(const [A_,B_] of RD_LINKS){if(A_==='head'&&B_==='hip')continue;if(A_==='neck'&&B_==='sh')continue;if(r.kind==='behead'&&A_==='head')continue;
+    if(A_==='sh'&&B_==='e0'&&r.cut[0]==='e0'){ball('glow',Q.sh,R*1.05,0x6a0c08);continue}
+    seg('limb',Q[A_],Q[B_],R,ink);ball('joint',Q[B_],R,ink)}
+  if(r.kind==='behead')ball('glow',Q.neck,R*1.1,0x6a0c08);
   if(r.arrows&&r.arrows.length)drawStuck(r.arrows,k=>Q[k],r.dir);
   const hr=(gi?5.6:7.6)*s*SC;ball('head',Q.head,hr,ink);
+  if(r.kind==='behead'){const a2=r.hrot||0;ball('glow',[Q.head[0]+Math.cos(a2)*hr*.85,Q.head[1]+Math.sin(a2)*hr*.85,Q.head[2]],hr*.35,0x6a0c08)}
 }
 
 // ── sword trails (additive ribbons)

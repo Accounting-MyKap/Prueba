@@ -61,7 +61,13 @@ Detrás de cada estatua hay una empalizada de lanzas afiladas. Con la orden *Gua
 ## Sangre y muertes
 
 - Las flechas se clavan en el cuerpo (vivo o muerto) donde impactan, hasta 5 por soldado; las de fuego siguen ardiendo.
-- Quien muere por flecha se desploma hacia atrás; los golpes fuertes y explosiones lanzan el cuerpo.
+- Muertes distintas según el golpe:
+  - **Espada:** cae de rodillas y se desploma; a veces (siempre en críticos) la cabeza sale volando y el cuello suelta chorros de sangre.
+  - **Lanza:** el golpe levanta al soldado y lo lanza hacia atrás.
+  - **Gigante:** el mazazo lo manda por los aires.
+  - **Flecha:** se desploma hacia atrás.
+  - **Explosión o meteoro:** el cuerpo sale despedido y carbonizado, a veces sin un brazo.
+- Los cuerpos quedan en el campo unos 15 segundos antes de hundirse en el suelo.
 - Los cuerpos sangran y forman un charco que crece; la sangre y los charcos quedan en el campo unos 40 segundos antes de desaparecer.
 - Los heridos (menos de 40% de vida) gotean sangre.
 - Al recibir un golpe no hay destello: solo salpica sangre.
