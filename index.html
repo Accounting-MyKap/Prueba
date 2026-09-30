@@ -622,6 +622,17 @@ function doHit(u){
     G.shake=Math.max(G.shake,7);dustRing(cx,GROUND+u.z,16,1.3);sfx('boom',u.x);
     return;
   }
+  if(u.type==='miner'&&ctrl){
+    const mx=[...MINES[0],...MINES[1]].find(m=>Math.abs(m-u.x)<62);
+    if(mx!==undefined){
+      const cap=Math.round(50*minerMult(u.team));
+      if(u.carry>=cap){float(u.x,GROUND+u.z-70,'Bolsa llena','#f1e7d3',14,u.z);return}
+      const g=Math.min(cap-u.carry,Math.round(10*minerMult(u.team)));u.carry+=g;u.dir=Math.sign(mx-u.x)||u.dir;
+      for(let i=0;i<6;i++)part({k:'gold',z:u.z,x:u.x+u.dir*18+rnd(-4,4),y:GROUND+u.z-8,vx:rnd(-60,60),vy:rnd(-160,-60),life:rnd(.4,.7)});
+      float(u.x,GROUND+u.z-70,`+${g} (${u.carry}/${cap})`,'#e9b041',14,u.z);sfx('clang',u.x);
+      return;
+    }
+  }
   // melee
   const reach=effRange(u)+14;
   let hits=[];
@@ -732,16 +743,19 @@ function updUnit(u,dt){
   if(u.atkT>=0){u.moving=false;tickAttack(u,dt);return}
   if(u.type==='miner')minerAI(u,dt);else soldierAI(u,dt);
 }
+function minerMult(team){return team===0&&G.kind==='campaign'?G.mods[0].carry:G.cfg[team].inc}
+function depositGold(u){
+  const tm=G.teams[u.team],g=Math.round(u.carry);tm.gold+=g;
+  if(u.team===0){G.stats.mined+=g;if(!G.demo){float(u.x,GROUND+u.z-60,'+'+g,'#e9b041',15,u.z);sfx('coin',u.x)}}
+  u.carry=0;u.state='toMine';u.mineX=0;
+}
 function minerAI(u,dt){
   const tm=G.teams[u.team],fwd=u.team?-1:1,home=STATUE[u.team],spd=TYPES.miner.spd*(tm.rage>0?1.3:1);
   if(G.command[u.team]===0){const gx=home-fwd*20;if(moveTo(u,gx,spd,dt)){u.hidden=true;u.hp=Math.min(u.max,u.hp+14*dt)}return}
   u.hidden=false;
   if(u.carry>0||u.state==='toBase'){
     u.state='toBase';u.z=lerp(u.z,u.z0,Math.min(1,dt*1.5));
-    if(moveTo(u,home+fwd*52,spd,dt)){
-      const g=Math.round(u.carry);tm.gold+=g;if(u.team===0){G.stats.mined+=g;if(!G.demo){float(u.x,GROUND+u.z-60,'+'+g,'#e9b041',15,u.z);sfx('coin',u.x)}}
-      u.carry=0;u.state='toMine';
-    }
+    if(moveTo(u,home+fwd*52,spd,dt))depositGold(u);
     return;
   }
   if(u.state!=='toBase')u.z=lerp(u.z,-15+(u.id%3)*1.2,Math.min(1,dt*1.5));
@@ -753,7 +767,7 @@ function minerAI(u,dt){
   if(u.state==='mining'){
     u.moving=false;u.dir=fwd;const before=Math.floor(u.mineT*1.25);u.mineT+=dt*(tm.rage>0?1.3:1);const after=Math.floor(u.mineT*1.25);
     if(after>before){const x=u.x+fwd*22;for(let i=0;i<4;i++)part({k:'gold',z:u.z,x:x+rnd(-4,4),y:GROUND+u.z-8,vx:rnd(-60,60),vy:rnd(-150,-60),life:rnd(.4,.7)});if(u.team===0)sfx('clang',u.x)}
-    if(u.mineT>=3.2){u.carry=40*(u.team===0&&G.kind==='campaign'?G.mods[0].carry:G.cfg[u.team].inc);u.state='toBase';u.mineX=0}
+    if(u.mineT>=3.2){u.carry=Math.max(u.carry,40*minerMult(u.team));u.state='toBase';u.mineX=0}
   }
 }
 function soldierAI(u,dt){
@@ -813,6 +827,7 @@ function controlled(u,dt){
     return;
   }
   if(inp.atk&&u.cd<=0&&!busy){startAttack(u,null);if(u.type==='mage')u.dir=Math.sign(inp.mx-u.x)||u.dir}
+  if(u.type==='miner'&&u.carry>0){const home=STATUE[u.team]+(u.team?-52:52);if(Math.abs(u.x-home)<70)depositGold(u)}
 }
 
 // ───────────────────────── main update ─────────────────────────
@@ -1543,7 +1558,7 @@ function ui(dt){
   for(const kx of ORDER){const c=cards[kx],q=tm.queue[kx];c.q.hidden=!q;if(q)c.q.textContent=q;c.prog.style.width=(q?tm.prog[kx]*100:0)+'%';c.b.classList.toggle('poor',tm.gold<TYPES[kx].cost)}
   document.querySelectorAll('#abils .cmd').forEach(b=>{const kx=b.dataset.a;b.querySelector('.cd').style.height=(tm.cool[kx]/ABIL[kx].cd*100)+'%';b.classList.toggle('poor',tm.mana<ABIL[kx].mana);b.classList.toggle('aim',aiming===kx)});
   const cu=G.ctrl!==null?G.units.find(u=>u.id===G.ctrl):null;
-  $('#ctrlTag').hidden=!cu;if(cu)setTxt('ctrlName',TYPES[cu.type].n+(cu.rank?' '+'★'.repeat(cu.rank):''));
+  $('#ctrlTag').hidden=!cu;if(cu)setTxt('ctrlName',TYPES[cu.type].n+(cu.rank?' '+'★'.repeat(cu.rank):'')+(cu.type==='miner'?` · bolsa ${Math.round(cu.carry)} oro`:''));
   $('#pad').hidden=!(cu&&coarse);
   $('#timerChip').hidden=!G.survive;if(G.survive)setTxt('timer',fmt(Math.max(0,G.survive-G.t)));
   drawMini();
@@ -1594,8 +1609,10 @@ function miniJump(e){const r=mini.getBoundingClientRect();G.cam=clamp((e.clientX
 mini.addEventListener('pointerdown',e=>{if(!G||G.ctrl!==null)return;miniDrag=true;mini.setPointerCapture(e.pointerId);miniJump(e)});
 mini.addEventListener('pointermove',e=>{if(miniDrag)miniJump(e)});
 mini.addEventListener('pointerup',()=>miniDrag=false);
-function takeControl(u){G.ctrl=u.id;hoverU=null;u.atkT=-1;u.charge=0;toast(`Controlas a un ${TYPES[u.type].n}: A/D mover, W saltar, Shift esquivar`)}
-function releaseControl(){if(G.ctrl!==null){const u=G.units.find(o=>o.id===G.ctrl);if(u)u.charge=0;G.ctrl=null}}
+function resetMiner(u){if(u&&u.type==='miner'){u.state=u.carry>0?'toBase':'toMine';u.mineX=0;u.mineT=0}}
+function takeControl(u){const prev=G.ctrl!==null?G.units.find(o=>o.id===G.ctrl):null;resetMiner(prev);G.ctrl=u.id;hoverU=null;u.atkT=-1;u.charge=0;resetMiner(u);
+  toast(u.type==='miner'?'Minero: pica junto a una mina (Espacio) y lleva el oro a tu estatua':`Controlas a un ${TYPES[u.type].n}: A/D mover, W saltar, Shift esquivar`)}
+function releaseControl(){if(G.ctrl!==null){const u=G.units.find(o=>o.id===G.ctrl);if(u){u.charge=0;resetMiner(u)}G.ctrl=null}}
 document.querySelectorAll('#pad [data-k]').forEach(b=>{const kx=b.dataset.k;
   b.addEventListener('pointerdown',e=>{e.preventDefault();inp[kx]=true;if(kx==='atk')inp.aimActive=false});
   for(const ev of ['pointerup','pointerleave','pointercancel'])b.addEventListener(ev,()=>{if(kx!=='jump'&&kx!=='dash')inp[kx]=false})});

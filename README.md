@@ -82,6 +82,7 @@ La **escaramuza** sigue disponible con todo desbloqueado, sin mejoras y con 3 di
 | `Z` `X` `C` | Guarnición · Defender · Atacar |
 | `Q` `E` `R` | Poderes (apuntan al cursor) |
 | Clic en soldado / `Tab` | Controlarlo |
+| Minero controlado | Pica junto a una mina con `Espacio` o clic y lleva la bolsa a tu estatua para entregar el oro |
 | `A` `D` / flechas | Mover unidad o cámara |
 | `W` · `Shift` | Saltar · Esquivar |
 | `Espacio` / clic | Atacar (mantén para cargar el arco) |
