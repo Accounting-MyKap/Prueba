@@ -1,8 +1,30 @@
 # Guerra de Varas
 
-Juego de estrategia en tiempo real inspirado en *Stick War: Legacy*, hecho en un solo archivo HTML5 (canvas + JavaScript, sin dependencias).
+Juego de estrategia en tiempo real inspirado en *Stick War: Legacy*, en 3D, hecho en un solo archivo HTML con [Three.js](https://threejs.org/) (r128, cargado desde cdnjs).
 
-Abre `index.html` en el navegador para jugar.
+Abre `index.html` en el navegador para jugar (necesita conexión para descargar Three.js y las fuentes).
+
+## 3D
+
+- Terreno con relieve, bosques, montañas con niebla atmosférica, nubes y cielo con sol, luna y estrellas.
+- Luz del sol con sombras reales que cambia con el ciclo día/noche; de noche iluminan las antorchas, los magos, los cascos de los mineros y las explosiones.
+- Los palitos son esqueletos 3D (cilindros y esferas instanciados) que usan las mismas animaciones: IK en las piernas, estelas de arma y ragdolls.
+- Cuatro vistas de cámara (`V` o el botón de cámara): clásica, cercana, épica y aérea. Rueda para zoom y clic derecho + arrastrar para girar.
+
+## Forja: armas y armaduras
+
+Las mejoras de unidad de la Armería cambian el aspecto de la tropa en cada nivel además de subir sus estadísticas:
+
+| Unidad | Nivel 1 | Nivel 2 | Nivel 3 (efecto especial) |
+|---|---|---|---|
+| Minero | Casco con lámpara | Pico de acero y bolsa grande | Pico de oro |
+| Espada | Hoja de acero y hombrera | Yelmo de hierro | Filo de brasa y capa: los golpes queman |
+| Arquero | Arco largo y carcaj | Arco recurvo y manto | Arco dorado: flechas de fuego que queman |
+| Lancero | Escudo con aro de metal | Yelmo cerrado y hombreras | Escudo torre dorado: 25% de bloquear golpes |
+| Mago | Túnica | Cristal arcano | Orbes guardianes |
+| Gigante | Garrote con púas | Martillo de piedra | Mazo de hierro y casco con cuernos |
+
+En la campaña el Caos también mejora su equipo (+5% de vida y daño por nivel): forja 1 desde la batalla 4, forja 2 desde la 6 y forja 3 en la batalla final.
 
 ## Qué tiene
 
@@ -30,7 +52,7 @@ Cada victoria da hasta 3 estrellas: ganar, terminar con la estatua por encima de
 
 ### Armería
 
-Las coronas se gastan entre batallas en 11 mejoras permanentes (hasta 3 niveles cada una): más oro por minero, oro inicial, entrenamiento más rápido, estatua más resistente, mejoras por tipo de unidad, más maná y la Academia, con la que las tropas nacen con rango ★.
+Las coronas se gastan entre batallas en 11 mejoras permanentes (hasta 3 niveles cada una): la Forja de cada unidad (con vista previa 3D del equipo actual y el siguiente), oro inicial, entrenamiento más rápido, estatua más resistente, más maná y la Academia, con la que las tropas nacen con rango ★.
 
 El progreso se guarda en el navegador (`localStorage`). Desde la Armería se puede reiniciar.
 
@@ -40,6 +62,8 @@ La **escaramuza** sigue disponible con todo desbloqueado, sin mejoras y con 3 di
 
 | Área | Qué cambia |
 |---|---|
+| 3D | Mundo 3D con luces, sombras y cuatro cámaras |
+| Forja | Cada mejora cambia armas y armaduras |
 | Animación | Esqueletos procedurales: piernas con IK, balanceo de brazos, inclinación al correr, golpes con anticipación y estela del arma, parpadeo al recibir daño |
 | Muertes | Ragdoll con física Verlet: los cuerpos salen despedidos según el golpe |
 | Efectos | Sangre que mancha el suelo, chispas en armaduras, explosiones con brasas y humo, temblor de cámara, *hit-stop* en críticos, cámara lenta en meteoros |
@@ -62,6 +86,8 @@ La **escaramuza** sigue disponible con todo desbloqueado, sin mejoras y con 3 di
 | `W` · `Shift` | Saltar · Esquivar |
 | `Espacio` / clic | Atacar (mantén para cargar el arco) |
 | `Esc` | Soltar la unidad / cancelar poder |
+| `V` | Cambiar vista de cámara |
+| Rueda · clic derecho | Zoom · girar la cámara |
 | `P` · `M` | Pausa · Sonido |
 
 En pantallas táctiles aparecen botones de movimiento al controlar una unidad.
