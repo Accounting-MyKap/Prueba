@@ -19,7 +19,7 @@ Inspirados en los espartanos de *300*:
 - **Recuperar la lanza:** la lanza queda clavada en el suelo; pasar sobre ella la recoge, y al volver a la estatua se rearman. Las lanzas propias en el suelo se marcan con un anillo dorado.
 - **Escudo:** bloqueando de frente reciben ~30% del daño normal (las flechas casi nada; la magia, 60%). Por la espalda no protege. No pueden atacar mientras bloquean y se mueven más lento.
 - **IA:** levantan el escudo ante el golpe de un gigante o cuando les llueven flechas, y con la orden *Defender* forman un muro de escudos.
-- **Control directo:** clic o `Espacio` lanza la lanza hacia el cursor si no hay nadie al alcance (si lo hay, ataca cuerpo a cuerpo). Mantén `S` o `↓` (botón 🛡 en el móvil) para bloquear.
+- **Control directo:** `Espacio` o clic ataca cuerpo a cuerpo, `F` lanza la lanza hacia el cursor (botón 🎯 en el móvil) y mantener `Q` bloquea (botón 🛡).
 
 ## Magos
 
@@ -31,6 +31,28 @@ La bola de fuego sigue un arco de mortero (unos 45–50°) y cae en el carril de
 - La cámara se acerca sola según el tamaño de la pantalla; pellizca con dos dedos para hacer zoom y usa el botón de cámara para cambiar de vista.
 - Al controlar un soldado la barra se oculta y quedan los botones de mover, esquivar, saltar, bloquear (lancero), atacar y soltar.
 - Menos carga gráfica en móviles (sombras y resolución más bajas). En vertical se sugiere girar el teléfono.
+
+## Guarnición
+
+Con la orden *Guarnición* todas las tropas se refugian en la estatua, se curan y disparan desde el pedestal (se ven de pie sobre él, como en el original). Los arqueros disparan con su daño normal y alcance de 560 px, los magos lanzan bolas de fuego, y el resto dispara flechas más débiles. La IA también se refugia cuando una fuerza mayor llega a sus puertas.
+
+## Sangre y muertes
+
+- Las flechas se clavan en el cuerpo (vivo o muerto) donde impactan, hasta 5 por soldado; las de fuego siguen ardiendo.
+- Quien muere por flecha se desploma hacia atrás; los golpes fuertes y explosiones lanzan el cuerpo.
+- Los cuerpos sangran y forman un charco que crece; la sangre y los charcos quedan en el campo unos 40 segundos antes de desaparecer.
+- Los heridos (menos de 40% de vida) gotean sangre.
+- Las armas caen al suelo: espadas y lanzas quedan clavadas, arcos y picos tumbados.
+- Botón *Sangre: Sí/No* en el menú y en la pausa para desactivarla.
+
+## Profundidad
+
+Las unidades pueden moverse hacia el fondo o el frente del campo. El cuerpo a cuerpo y los proyectiles solo aciertan a quien está en una franja cercana de profundidad: la IA se alinea con su objetivo y, controlando un soldado, puedes esquivar flechas cambiando de carril.
+
+## Magos: aturdimiento y esbirros
+
+- La bola de fuego aturde 0,8 s a los enemigos alcanzados (salvo gigantes); se ven estrellas girando sobre su cabeza.
+- `F` (o la IA cuando se acercan enemigos) invoca 2 esbirros oscuros con espada corta que duran 24 s y pueden bloquear con `Q` si los controlas.
 
 ## Poderes y visión
 
@@ -60,22 +82,24 @@ En la campaña el Caos también mejora su equipo (+5% de vida y daño por nivel)
 - **Órdenes:** Guarnición, Defender y Atacar.
 - **Control directo:** toma el mando de cualquier soldado.
 
-## Campaña
+## Campaña: conquista de naciones
 
-8 batallas en orden. Cada nivel desbloquea unidades o poderes y cambia las reglas del enemigo:
+Como en el original, el mundo está dividido en naciones y cada una se especializa en un tipo de soldado. Al conquistar una nación, su unidad se une a tu ejército para la siguiente batalla. Cada nación tiene su propio monumento: arquero de piedra, espadachín, lancero con escudo, mago con báculo, gigante con garrote o el trono con cuernos del Caos. Tu estatua es el rey coronado del Orden.
 
-| # | Nivel | Novedad |
-|---|---|---|
-| 1 | Primer filo | Mineros y espadas |
-| 2 | Arcos en la colina | Arqueros y Furia |
-| 3 | Muro de escudos | Lanceros y Lluvia de flechas |
-| 4 | Noche eterna | Magos; siempre es de noche |
-| 5 | Asedio | La estatua enemiga tiene 7000 de vida; +600 de oro inicial |
-| 6 | El despertar | Gigantes y Meteoro |
-| 7 | Resistir | Supervivencia: aguanta 4 minutos contra una horda |
-| 8 | Trono del Caos | Jefe final: el Rey Gigante aparece al minuto |
+| # | Nación | Especialidad enemiga | Qué ganas al vencer |
+|---|---|---|---|
+| 1 | Arquidonia | Arqueros | Arqueros |
+| 2 | Clan de la Espada | Hordas de espadachines | (Furia desde esta batalla) |
+| 3 | Lancedonia | Lanceros con muro de escudos | Lanceros |
+| 4 | Magocracia | Magos que aturden e invocan esbirros; noche permanente | Magos |
+| 5 | Fortaleza Roja | Asedio: monumento con 7000 de vida; +600 de oro inicial | — |
+| 6 | Colinas de Hielo | Gigantes | Gigantes (Meteoro desde esta batalla) |
+| 7 | Tierra de Nadie | Supervivencia: aguanta 4 minutos contra una horda | — |
+| 8 | Trono del Caos | Jefe final: el Rey Gigante aparece al minuto | — |
 
-Cada victoria da hasta 3 estrellas: ganar, terminar con la estatua por encima del 50% y ganar por debajo del tiempo objetivo (en *Resistir*, terminar por encima del 80%). Las estrellas nuevas dan coronas; repetir un nivel ya completado da 25.
+El enemigo también mejora su forja: nivel 1 en las batallas 5 y 6, nivel 2 en la 7 y nivel 3 en la final.
+
+Cada victoria da hasta 3 estrellas: ganar, terminar con la estatua por encima del 50% y ganar por debajo del tiempo objetivo (en *Tierra de Nadie*, terminar por encima del 80%). Las estrellas nuevas dan coronas; repetir un nivel ya completado da 25.
 
 ### Armería
 
@@ -103,20 +127,22 @@ La **escaramuza** sigue disponible con todo desbloqueado, sin mejoras y con 3 di
 
 ## Controles
 
+Basados en la guía de control del original.
+
 | Tecla | Acción |
 |---|---|
 | `1`–`6` | Entrenar unidades |
 | `Z` `X` `C` | Guarnición · Defender · Atacar |
-| `Q` `E` `R` | Poderes (apuntan al cursor) |
+| `Q` `E` `R` | Poderes (apuntan al cursor) cuando no controlas a nadie |
 | Clic en soldado / `Tab` | Controlarlo |
-| Minero controlado | Pica junto a una mina con `Espacio` o clic y lleva la bolsa a tu estatua para entregar el oro |
-| `A` `D` / flechas | Mover unidad o cámara |
-| `W` · `Shift` | Saltar · Esquivar |
-| `S` / `↓` | Bloquear con el escudo (lancero controlado) |
-| `Espacio` / clic | Atacar (mantén para cargar el arco) |
+| `W` `A` `S` `D` / flechas | Mover la unidad controlada en las cuatro direcciones (también hacia el fondo y el frente del campo); sin unidad, `A` `D` mueven la cámara |
+| `Espacio` / clic | Atacar · minar (mantén para cargar el arco) |
+| `Q` | Bloquear (espadachín: mitad de daño; lancero: escudo) |
+| `F` | Lancero: lanzar la lanza · Mago: invocar 2 esbirros (15 s de recarga) |
+| `J` · `Shift` | Saltar · Esquivar |
 | `Esc` | Soltar la unidad / cancelar poder |
 | `V` | Cambiar vista de cámara |
 | Rueda · clic derecho | Zoom · girar la cámara |
 | `P` · `M` | Pausa · Sonido |
 
-En pantallas táctiles aparecen botones de movimiento al controlar una unidad.
+En pantallas táctiles aparece una cruceta (▲ ◀ ▼ ▶) y botones de esquivar, saltar, bloquear 🛡, habilidad (🎯 lanza / ✦ esbirros), atacar ⚔ y soltar.

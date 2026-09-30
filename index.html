@@ -98,6 +98,9 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #pad{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:space-between;padding:0 16px;pointer-events:none}
 #pad .side{display:flex;gap:8px;pointer-events:auto}
 #pad button{width:58px;height:58px;border-radius:50%;background:rgba(19,16,13,.7);border:1px solid var(--line);font-size:20px;font-weight:700;touch-action:none}
+#pad .side{align-items:flex-end}
+#pad .dpad{display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(2,50px);gap:4px}
+#pad .dpad button{width:50px;height:50px;border-radius:12px}
 
 /* Overlays */
 .overlay{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at center,rgba(12,10,8,.55),rgba(12,10,8,.88));padding:16px;overflow:auto}
@@ -248,8 +251,8 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
     <div id="ctrlTag" hidden>Controlando: <b id="ctrlName"></b> · <kbd>Esc</kbd> soltar</div>
 
     <div id="pad" hidden>
-      <div class="side"><button data-k="left" aria-label="Izquierda">◀</button><button data-k="right" aria-label="Derecha">▶</button></div>
-      <div class="side"><button data-k="dash" aria-label="Esquivar">⇆</button><button data-k="jump" aria-label="Saltar">⤒</button><button data-k="block" id="padBlock" aria-label="Bloquear" hidden>🛡</button><button data-k="atk" aria-label="Atacar">⚔</button><button id="padRelease" aria-label="Soltar">✕</button></div>
+      <div class="side dpad"><button data-k="up" aria-label="Arriba" style="grid-column:2">▲</button><button data-k="left" aria-label="Izquierda" style="grid-column:1;grid-row:2">◀</button><button data-k="down" aria-label="Abajo" style="grid-column:2;grid-row:2">▼</button><button data-k="right" aria-label="Derecha" style="grid-column:3;grid-row:2">▶</button></div>
+      <div class="side"><button data-k="dash" aria-label="Esquivar">⇆</button><button data-k="jump" aria-label="Saltar">⤒</button><button data-k="block" id="padBlock" aria-label="Bloquear" hidden>🛡</button><button data-k="special" id="padSpecial" aria-label="Habilidad" hidden>✦</button><button data-k="atk" aria-label="Atacar">⚔</button><button id="padRelease" aria-label="Soltar">✕</button></div>
     </div>
 
     <div class="overlay" id="menu">
@@ -260,7 +263,8 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
           <div>
             <h2>Novedades</h2>
             <ul class="news">
-              <li><b>Campaña de 8 batallas.</b> Gana coronas y mejora tu ejército en la Armería entre batallas.</li>
+              <li><b>Conquista de naciones.</b> 8 batallas: cada nación vencida te da su unidad. Gana coronas para la Armería.</li>
+              <li><b>Guarnición y sangre.</b> Tus tropas disparan desde la estatua; las flechas se clavan y los caídos dejan charcos.</li>
               <li><b>Mundo 3D.</b> Luces y sombras reales, ciclo día/noche y cuatro vistas de cámara.</li>
               <li><b>Forja.</b> Cada mejora de unidad cambia su arma y armadura y aumenta su daño.</li>
               <li><b>Animación esquelética.</b> Piernas con IK, golpes con estela, muertes con física ragdoll.</li>
@@ -278,10 +282,11 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
               <dt><kbd>Z</kbd> <kbd>X</kbd> <kbd>C</kbd></dt><dd>Guarnición · Defender · Atacar</dd>
               <dt><kbd>Q</kbd> <kbd>E</kbd> <kbd>R</kbd></dt><dd>Poderes (apuntan al cursor)</dd>
               <dt>Clic en soldado</dt><dd>Controlarlo (<kbd>Tab</kbd> elige el del frente)</dd>
-              <dt><kbd>A</kbd> <kbd>D</kbd></dt><dd>Mover unidad o cámara</dd>
-              <dt><kbd>W</kbd> · <kbd>Shift</kbd></dt><dd>Saltar · Esquivar</dd>
-              <dt><kbd>S</kbd></dt><dd>Bloquear con el escudo (lancero)</dd>
-              <dt><kbd>Espacio</kbd> / clic</dt><dd>Atacar (mantén para cargar el arco)</dd>
+              <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Mover la unidad (también arriba y abajo del campo) o la cámara</dd>
+              <dt><kbd>Espacio</kbd> / clic</dt><dd>Atacar · minar (mantén para cargar el arco)</dd>
+              <dt><kbd>Q</kbd></dt><dd>Bloquear (espadachín y lancero, al controlarlos)</dd>
+              <dt><kbd>F</kbd></dt><dd>Lanzar la lanza · invocar esbirros (mago)</dd>
+              <dt><kbd>J</kbd> · <kbd>Shift</kbd></dt><dd>Saltar · Esquivar</dd>
               <dt>Arrastrar</dt><dd>Mover la cámara</dd>
               <dt>Rueda · clic derecho</dt><dd>Zoom · girar la cámara (en el móvil, pellizca)</dd>
               <dt><kbd>V</kbd></dt><dd>Cambiar vista</dd>
@@ -295,6 +300,7 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
             <button data-d="facil">Fácil</button><button data-d="normal" class="on">Normal</button><button data-d="dificil">Difícil</button>
           </div>
           <button class="ghost" id="btnPlay">Escaramuza</button>
+          <button class="ghost goreBtn" type="button" aria-pressed="true">Sangre: Sí</button>
         </div>
         <p class="hint">Detrás se juega una batalla de demostración. Mejor en horizontal en el teléfono.</p>
       </div>
@@ -326,6 +332,7 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
         <div class="row" style="justify-content:center">
           <button class="big" id="btnResume">Seguir</button>
           <button class="ghost" id="btnQuit">Menú</button>
+          <button class="ghost goreBtn" type="button" aria-pressed="true">Sangre: Sí</button>
         </div>
       </div>
     </div>
@@ -388,6 +395,7 @@ const TYPES={
   spear :{n:'Lancero',   cost:450, hp:440, spd:46,dmg:26,range:34, cd:1.3,atk:.62,hitAt:.5, build:6,  pop:2,size:1.1,armor:.35},
   mage  :{n:'Mago',      cost:600, hp:120, spd:48,dmg:40,range:290,cd:3.4,atk:1.0,hitAt:.6, build:7,  pop:2,size:1,ranged:true,aoe:64},
   giant :{n:'Gigante',   cost:1400,hp:1700,spd:32,dmg:78,range:46, cd:2.5,atk:1.1,hitAt:.58,build:12, pop:4,size:2.1,aoe:62},
+  minion:{n:'Esbirro',    cost:0,   hp:55,  spd:88,dmg:8, range:20, cd:.8, atk:.45,hitAt:.45,build:99, pop:0,size:.82},
   boss  :{n:'Rey Gigante',cost:3000,hp:7500,spd:24,dmg:130,range:58,cd:2.3,atk:1.2,hitAt:.58,build:99, pop:0,size:2.8,aoe:90},
 };
 const GI=u=>u.type==='giant'||u.type==='boss';
@@ -402,28 +410,28 @@ const RANK_XP=[3,8,16];
 const ALL_ABIL=['rain','rage','meteor'];
 // Campaign: each level unlocks units/powers for the player and configures the enemy
 const LEVELS=[
-  {n:'Primer filo',where:'Colinas del Orden',desc:'Saqueadores del Caos con espadas oxidadas. Aprende a minar y a sostener la línea.',
+  {n:'Arquidonia',forge:0,faction:'archer',where:'Nación de los arqueros',desc:'Sus arqueros disparan desde lejos y su monumento es un arquero de piedra. Cierra distancia con tus espadas. Conquístalos para reclutar arqueros.',
    units:['miner','sword'],abil:[],par:300,reward:120,
-   enemy:{units:['sword'],inc:.7,bonus:0,think:1.8,abil:false,push:170,statue:2200,start:[['miner',2],['sword',1]]}},
-  {n:'Arcos en la colina',where:'Paso del Viento',desc:'El enemigo ya dispara desde lejos. Tus arqueros llegan al frente y aprendes la Furia.',
+   enemy:{units:['archer','sword'],focus:'archer',inc:.7,bonus:0,think:1.8,abil:false,push:190,statue:2200,start:[['miner',2],['archer',1]]}},
+  {n:'Clan de la Espada',forge:0,faction:'sword',where:'Estepas del Filo',desc:'Hordas de espadachines que cargan en masa. Tus nuevos arqueros los frenan; aquí aprendes la Furia.',
    units:['miner','sword','archer'],abil:['rage'],par:330,reward:150,
-   enemy:{units:['sword','archer'],inc:.85,bonus:.5,think:1.4,abil:false,push:150,statue:2800,start:[['miner',2],['sword',2]]}},
-  {n:'Muro de escudos',where:'Vado de Bronce',desc:'Los lanceros del Caos cierran el vado. Rompe su muro con la Lluvia de flechas.',
-   units:['miner','sword','archer','spear'],abil:['rage','rain'],par:360,reward:180,
-   enemy:{units:['sword','archer','spear'],inc:.9,bonus:.6,think:1.3,abil:false,push:190,statue:3200,start:[['miner',3],['spear',1]]}},
-  {n:'Noche eterna',where:'Bosque Umbrío',desc:'Aquí nunca amanece: los arqueros ven menos. Tus magos iluminan el campo con fuego.',
-   units:['miner','sword','archer','spear','mage'],abil:['rage','rain'],par:390,reward:210,night:true,
-   enemy:{units:['sword','archer','spear','mage'],inc:.95,bonus:.6,think:1.25,abil:true,push:230,statue:3500,start:[['miner',3],['sword',2]]}},
-  {n:'Asedio',where:'Fortaleza Roja',desc:'La estatua del Caos tiene el doble de piedra. Empiezas con 600 de oro extra para el asedio.',
+   enemy:{units:['sword','archer'],focus:'sword',inc:.85,bonus:.5,think:1.4,abil:false,push:150,statue:2800,start:[['miner',2],['sword',2]]}},
+  {n:'Lancedonia',forge:0,faction:'spear',where:'Vado de Bronce',desc:'Los lanceros cierran el vado con su muro de escudos y lanzan sus lanzas. Rómpelo con la Lluvia de flechas y consigue lanceros.',
+   units:['miner','sword','archer'],abil:['rage','rain'],par:360,reward:180,
+   enemy:{units:['spear','sword','archer'],focus:'spear',inc:.85,bonus:.5,think:1.35,abil:false,push:200,statue:3200,start:[['miner',3],['sword',1]]}},
+  {n:'Magocracia',forge:0,faction:'mage',where:'Bosque Umbrío',desc:'Aquí nunca amanece y los magos aturden con fuego e invocan esbirros. Tus lanceros aguantan sus bolas de fuego. Conquístalos para tener magos.',
+   units:['miner','sword','archer','spear'],abil:['rage','rain'],par:390,reward:210,night:true,
+   enemy:{units:['mage','sword','spear','archer'],focus:'mage',inc:.9,bonus:.5,think:1.3,abil:true,push:230,statue:3500,start:[['miner',3],['sword',2]]}},
+  {n:'Fortaleza Roja',forge:1,faction:'sword',where:'Asedio',desc:'La fortaleza del Caos tiene el doble de piedra. Empiezas con 600 de oro extra para el asedio.',
    units:['miner','sword','archer','spear','mage'],abil:['rage','rain'],par:480,reward:240,goldBonus:600,
    enemy:{units:['sword','archer','spear','mage'],inc:.95,bonus:.7,think:1.2,abil:true,push:260,statue:7000,start:[['miner',3],['archer',1]]}},
-  {n:'El despertar',where:'Cantera de los Titanes',desc:'Ambos bandos despiertan a los gigantes. Recibes el Meteoro.',
-   units:['miner','sword','archer','spear','mage','giant'],abil:ALL_ABIL,par:480,reward:270,
-   enemy:{units:['sword','archer','spear','mage','giant'],inc:1,bonus:1.1,think:1.05,abil:true,push:230,statue:4000,start:[['miner',3],['sword',2]]}},
-  {n:'Resistir',where:'Última Muralla',desc:'Una horda sin fin. Mantén tu estatua en pie durante 4 minutos. La estatua enemiga no se puede dañar.',
+  {n:'Colinas de Hielo',forge:1,faction:'giant',where:'Tierra de gigantes',desc:'Los gigantes bajan de las montañas. Aguanta sus mazazos y conquístalos para reclutar gigantes. Recibes el Meteoro.',
+   units:['miner','sword','archer','spear','mage'],abil:ALL_ABIL,par:480,reward:270,
+   enemy:{units:['giant','sword','archer','spear'],focus:'giant',inc:1,bonus:1.1,think:1.05,abil:true,push:230,statue:4000,start:[['miner',3],['sword',2]]}},
+  {n:'Tierra de Nadie',forge:2,faction:'chaos',where:'Última muralla',desc:'Una horda sin fin. Mantén tu estatua en pie durante 4 minutos. La estatua enemiga no se puede dañar.',
    units:['miner','sword','archer','spear','mage','giant'],abil:ALL_ABIL,par:0,reward:300,survive:240,goldBonus:300,
    enemy:{units:['sword','archer','spear','mage','giant'],inc:1.25,bonus:3.5,think:.8,abil:true,push:25,statue:5000,start:[['miner',4],['sword',2]]}},
-  {n:'Trono del Caos',where:'Ciudadela del Caos',desc:'El Rey Gigante despierta al minuto de batalla. Derriba la estatua del Caos para acabar la guerra.',
+  {n:'Trono del Caos',forge:3,faction:'chaos',where:'Ciudadela del Caos',desc:'El Rey Gigante despierta al minuto de batalla. Derriba la estatua del Caos para acabar la guerra.',
    units:['miner','sword','archer','spear','mage','giant'],abil:ALL_ABIL,par:600,reward:360,boss:true,
    enemy:{units:['sword','archer','spear','mage','giant'],inc:1.2,bonus:2.2,think:.8,abil:true,push:200,statue:5500,start:[['miner',4],['sword',2],['spear',1]]}},
 ];
@@ -435,9 +443,9 @@ const UPG=[
   {id:'walls',n:'Muros de piedra',  d:'Tu estatua tiene +20% de vida por nivel.',          cost:40, max:3,req:1},
   {id:'sword',n:'Forja: Espadas',   d:'+12% vida y +15% daño por nivel. Nivel 3: los golpes queman.',unit:'sword',tiers:['Acero y hombrera','Yelmo de hierro','Filo de brasa'], cost:35, max:3,req:1},
   {id:'archer',n:'Forja: Arqueros', d:'+10% alcance y +12% daño por nivel. Nivel 3: flechas de fuego.',unit:'archer',tiers:['Arco largo y carcaj','Arco recurvo','Arco dorado'], cost:45, max:3,req:2},
-  {id:'spear',n:'Forja: Lanceros',  d:'+15% vida, +8% daño y +5% armadura por nivel. N1: la lanza atraviesa 3 enemigos. N2: llevan 2 lanzas. N3: el escudo bloquea 85% y devuelve flechas.',unit:'spear',tiers:['Lanza perforante','Doble lanza y yelmo','Escudo torre dorado'], cost:55, max:3,req:3},
-  {id:'mage', n:'Forja: Magos',     d:'+15% daño y área por nivel.',unit:'mage',tiers:['Túnica','Cristal arcano','Orbes guardianes'], cost:60, max:3,req:4},
-  {id:'giant',n:'Forja: Gigantes',  d:'+15% vida y daño por nivel.',unit:'giant',tiers:['Garrote con púas','Martillo de piedra','Mazo de hierro'], cost:70, max:3,req:6},
+  {id:'spear',n:'Forja: Lanceros',  d:'+15% vida, +8% daño y +5% armadura por nivel. N1: la lanza atraviesa 3 enemigos. N2: llevan 2 lanzas. N3: el escudo bloquea 85% y devuelve flechas.',unit:'spear',tiers:['Lanza perforante','Doble lanza y yelmo','Escudo torre dorado'], cost:55, max:3,req:4},
+  {id:'mage', n:'Forja: Magos',     d:'+15% daño y área por nivel.',unit:'mage',tiers:['Túnica','Cristal arcano','Orbes guardianes'], cost:60, max:3,req:5},
+  {id:'giant',n:'Forja: Gigantes',  d:'+15% vida y daño por nivel.',unit:'giant',tiers:['Garrote con púas','Martillo de piedra','Mazo de hierro'], cost:70, max:3,req:7},
   {id:'well', n:'Pozo arcano',      d:'Maná: +25% regeneración y +20 inicial por nivel.',  cost:45, max:3,req:2},
   {id:'acad', n:'Academia',         d:'Las tropas nuevas nacen con un rango ★ por nivel.', cost:120,max:2,req:5},
 ];
@@ -482,6 +490,8 @@ function ik(ax,ay,bx,by,l1,l2,bend){
 
 // ───────────────────────── state ─────────────────────────
 let G=null, paused=false, mode='menu', diffSel='normal';
+let GORE=true;try{GORE=localStorage.getItem('gdv-gore')!=='0'}catch(e){}
+const LANE=16; // melee and missiles only connect within this depth (px) of the target
 let P=[], F=[]; const trails=new Map();
 function mkTeam(){return {gold:500,mana:40,statue:{hp:3500,max:3500,flash:0},queue:{miner:0,sword:0,archer:0,spear:0,mage:0,giant:0},prog:{miner:0,sword:0,archer:0,spear:0,mage:0,giant:0},cool:{rain:0,rage:0,meteor:0},rage:0,reserve:0}}
 function aiCfg(d,units){return {inc:d.inc,bonus:d.bonus,think:d.think,abil:d.abil,units:units||ORDER,push:110,miners:d===DIFFS.dificil?9:7}}
@@ -496,7 +506,7 @@ function newGame(o){
   if(L){
     const e=L.enemy;
     G.avail=[L.units.slice(),e.units.slice()];G.abils=[L.abil.slice(),e.abil?ALL_ABIL.slice():[]];
-    G.cfg=[{...aiCfg(DIFFS.normal,L.units),bonus:0},{inc:e.inc,bonus:e.bonus,think:e.think,abil:e.abil,units:e.units,push:e.push,miners:7}];
+    G.cfg=[{...aiCfg(DIFFS.normal,L.units),bonus:0},{inc:e.inc,bonus:e.bonus,think:e.think,abil:e.abil,units:e.units,push:e.push,miners:7,focus:e.focus}];
     G.night=!!L.night;G.survive=L.survive||0;G.bossAt=L.boss?60:0;
     if(G.night)G.day=.76;
   }else{
@@ -506,7 +516,7 @@ function newGame(o){
   }
   G.ai[0].push=G.cfg[0].push;G.ai[1].push=G.cfg[1].push;
   G.tiers=[{},{}];
-  const et=L?clamp(Math.floor((o.level-1)/2),0,3):demo?2:(G.diff==='dificil'?1:0);
+  const et=L?L.forge:demo?2:(G.diff==='dificil'?1:0);
   for(const ty of ORDER){G.tiers[0][ty]=L?(SAVE.up[TIER_UP[ty]]||0):demo?2:0;G.tiers[1][ty]=et;if(L&&et){G.mods[1].hp[ty]=G.mods[1].dmg[ty]=1+.05*et}}
   const p0=G.teams[0],p1=G.teams[1];
   p0.gold+=pm.startGold+(L&&L.goldBonus||0);p0.mana+=pm.startMana;
@@ -521,7 +531,7 @@ function spawn(team,type,x){
   const T=TYPES[type],m=G.mods[team],r0=type==='miner'?0:m.rank0,hp=Math.round(T.hp*(m.hp[type]||1)*(1+.12*r0));
   const u={id:G.nid++,team,type,x:x??STATUE[team]+(team?-44:44),z:rnd(-16,16),y:0,vy:0,vx:0,hp,max:hp,dir:team?-1:1,
     phase:rnd(0,6),moving:false,atkT:-1,cd:.3,hit:false,tgt:null,xp:r0?RANK_XP[r0-1]:0,rank:r0,flash:0,hpShow:0,state:'toMine',carry:0,mineT:0,mineX:0,
-    hidden:false,dash:0,dashCd:0,dashDir:1,aim:.2,charge:0,dead:false,cheer:rnd(0,2),burn:0,ammo:0,block:false,blockT:0,throwCd:0,atkKind:null,blkChk:0};
+    hidden:false,dash:0,dashCd:0,dashDir:1,aim:.2,charge:0,dead:false,cheer:rnd(0,2),burn:0,ammo:0,block:false,blockT:0,throwCd:0,atkKind:null,blkChk:0,stun:0,sumCd:6,life:0};
   u.z0=u.z;if(type==='spear')u.ammo=spearMax(u);G.units.push(u);
   if(G.t>0.5){for(let i=0;i<6;i++)part({k:'dust',z:u.z,x:u.x+rnd(-10,10),y:GROUND+u.z,vx:rnd(-40,40),vy:rnd(-40,-10),life:rnd(.4,.7),sz:rnd(3,6)})}
   return u;
@@ -562,7 +572,7 @@ function sfx(k,x){
 // ───────────────────────── particles / fx ─────────────────────────
 function part(o){o.max=o.life;if(P.length>750)P.splice(0,P.length-700);P.push(o)}
 function float(x,y,txt,col,size=16,z=0){F.push({x,y,z,txt,col,size,life:1.2})}
-function blood(x,y,dir,n,gy){for(let i=0;i<n;i++)part({k:'blood',z:gy-GROUND,x,y,vx:dir*rnd(20,160)+rnd(-30,30),vy:rnd(-200,-40),life:1.5,sz:rnd(1.5,3),gy})}
+function blood(x,y,dir,n,gy){if(!GORE)return;for(let i=0;i<n;i++)part({k:'blood',z:gy-GROUND,x,y,vx:dir*rnd(20,160)+rnd(-30,30),vy:rnd(-200,-40),life:1.5,sz:rnd(1.5,3.2),gy})}
 function sparks(x,y,n,z=0){for(let i=0;i<n;i++){const a=rnd(0,Math.PI*2),v=rnd(80,260);part({k:'spark',z,x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,life:rnd(.15,.35)})}}
 function dustRing(x,y,n,s=1,z=y-GROUND){for(let i=0;i<n;i++){const d=i%2?1:-1;part({k:'dust',z,x:x+rnd(-8,8)*s,y:y-rnd(0,4),vx:d*rnd(40,160)*s,vy:rnd(-60,-10),life:rnd(.5,.9),sz:rnd(4,9)*s})}}
 function explodeFx(x,y,r){
@@ -587,11 +597,13 @@ function hurt(t,dmg,src,o={}){
   if(t.dead||t.hidden)return;
   if(G.ctrl===t.id&&t.dash>0){float(t.x,GROUND+t.z-70,'Esquiva','#9fd3ff',14,t.z);return}
   const T=TYPES[t.type];
-  const blocked=t.block&&(Math.sign(fromX-t.x)||t.dir)===t.dir;
+  let blocked=t.block&&(Math.sign(fromX-t.x)||t.dir)===t.dir;
   if(src&&src.type&&(src.type==='sword'||src.type==='archer')&&tierOf(src)>=3)t.burn=Math.max(t.burn||0,2.5);
   let d=dmg;
-  if(blocked){
-    const t3=tierOf(t)>=3;d*=o.magic?.6:(1-T.armor-G.mods[t.team].armor)*(o.arrow?(t3?.05:.1):(t3?.15:.3));
+  if(blocked&&!(t.type!=='spear'&&o.magic)){
+    const t3=tierOf(t)>=3,shield=t.type==='spear';
+    if(!shield&&o.magic)blocked=false;
+    if(shield)d*=o.magic?.6:(1-T.armor-G.mods[t.team].armor)*(o.arrow?(t3?.05:.1):(t3?.15:.3));else d*=.5;
     sparks(t.x+t.dir*9*T.size,GROUND+t.z-t.y-30*T.size,o.magic?4:9,t.z);sfx('clang',t.x);
     if(!t.blkTxt||G.t-t.blkTxt>1.2){t.blkTxt=G.t;if(t.team===0||G.ctrl===t.id)float(t.x,GROUND+t.z-74,'Bloqueo','#f2c14e',13,t.z)}
     t.hp-=d;t.hpShow=2.5;t.vx+=-t.dir*(o.kb??35)*.25/T.size;
@@ -603,12 +615,31 @@ function hurt(t,dmg,src,o={}){
   const dir=Math.sign(t.x-fromX)||1;
   t.vx+=dir*(o.kb??35)/T.size;
   if(o.up&&t.y<=0)t.vy=o.up/T.size;
+  if(o.stun&&!GI(t))t.stun=Math.max(t.stun||0,o.stun);
   blood(t.x,GROUND+t.z-t.y-30*T.size,dir,Math.min(12,2+d/8),GROUND+t.z);
   if(t.hp<=0)kill(t,src,dir,o);
 }
+// Segments an arrow can lodge in (pose joint names; also ragdoll point names)
+const SEGS=[['neck','hip'],['head','neck'],['hip','k0'],['k0','f0'],['hip','k1'],['k1','f1'],['sh','e0'],['e0','h0'],['sh','e1'],['e1','h1']];
+function attachArrow(u,p){
+  const J=pose(u),s=TYPES[u.type].size,W=q=>[u.x+q[0]*u.dir*s,GROUND+u.z-u.y+q[1]*s];
+  let best=0,bd=1e9,bt=0;
+  for(let i=0;i<SEGS.length;i++){const A=W(J[SEGS[i][0]]),B=W(J[SEGS[i][1]]),dx=B[0]-A[0],dy=B[1]-A[1],t=clamp(((p.x-A[0])*dx+(p.y-A[1])*dy)/(dx*dx+dy*dy||1),0,1),dd=Math.hypot(A[0]+dx*t-p.x,A[1]+dy*t-p.y);if(dd<bd){bd=dd;best=i;bt=t}}
+  const A=W(J[SEGS[best][0]]),B=W(J[SEGS[best][1]]),sa=Math.atan2(B[1]-A[1],B[0]-A[0]);
+  (u.arrows||(u.arrows=[])).push({s:best,t:bt,d:(Math.atan2(p.vy,p.vx)-sa)*u.dir,team:p.team,f:p.fire?1:0});
+  if(u.arrows.length>5)u.arrows.shift();
+}
+function dropWeapon(u,dir){
+  if(!G.drops)G.drops=[];if(G.drops.length>40)G.drops.shift();
+  const J=pose(u),s=TYPES[u.type].size;let k=u.type;
+  if(k==='spear')k=u.ammo>0&&u.atkKind!=='throw'?'spear':'xiphos';
+  G.drops.push({k,tier:tierOf(u),team:u.team,x:u.x+J.h0[0]*u.dir*s,h:Math.max(6,u.y-J.h0[1]*s),z:u.z,vx:dir*rnd(30,110),vh:rnd(90,220),
+    ang:Math.atan2(Math.cos(J.wAng),Math.sin(J.wAng)*u.dir),va:rnd(-9,9),t:0,rest:false,s});
+}
 function kill(u,src,dir,o){
   u.dead=true;
-  makeRagdoll(u,dir,o.boom?1.8:(o.kb||35)>80?1.4:1);
+  makeRagdoll(u,dir,o.boom?1.8:(o.kb||35)>80?1.4:1,o);dropWeapon(u,dir);
+  if(GORE)blood(u.x,GROUND+u.z-u.y-30*TYPES[u.type].size,dir,16,GROUND+u.z);
   if(src&&!src.dead&&src.team!==undefined&&src.team!==u.team&&src.type){
     src.xp+=TYPES[u.type].cost/125;
     while(src.rank<3&&src.xp>=RANK_XP[src.rank]){
@@ -627,6 +658,17 @@ function statueDown(team){
   G.shake=18;G.slow=.25;G.over=1;G.winner=1-team;G.overT=0;
   sfx('boom',x);
   for(const u of G.units)if(u.team===team&&!u.dead){u.hidden=false}
+}
+const WALL_RANGE=560;
+const wallSlot=u=>({x:-50+(u.id%8)*14,z:-44+((u.id>>3)%2)*14});
+function garrisonShoot(u){
+  if(u.cd>0)return;
+  const T=TYPES[u.type],team=u.team,fwd=team?-1:1,home=STATUE[team];
+  const n=nearestEnemy(u);if(!n||n.t.statue!==undefined||Math.abs(n.t.x-home)>(u.type==='mage'?effRange(u)+60:WALL_RANGE))return;
+  const sl=wallSlot(u),hx=home+fwd*sl.x,z0=sl.z,hy=GROUND+z0-106;u.wallShot=G.t;
+  if(u.type==='mage'){u.cd=T.cd;lobFire(team,hx,hy,n.t.x,n.t.z,dmgOf(u).d,u.id,T.aoe*G.mods[team].aoe,z0);return}
+  const d=u.type==='archer'?dmgOf(u).d:10*(1+.12*u.rank);u.cd=u.type==='archer'?T.cd:2.1;
+  fireArrow(team,hx,hy,n.t,d,u.id,u.type==='archer'&&tierOf(u)>=3,z0);sfx('bow',hx);
 }
 function nearestEnemy(u){
   let best=null,bd=1e9;
@@ -647,6 +689,13 @@ function tickAttack(u,dt){
   if(p>=1){u.atkT=-1;u.atkKind=null}
 }
 const spearMax=u=>tierOf(u)>=2?2:1;
+function summonMinions(u){
+  u.sumCd=15;const fwd=u.dir;
+  for(let i=0;i<2;i++){const m=spawn(u.team,'minion',u.x+fwd*(22+i*10));m.z=clamp(u.z+(i?9:-9),-20,20);m.life=24;m.dir=fwd;
+    for(let j=0;j<10;j++)part({k:'smoke',z:m.z,x:m.x+rnd(-8,8),y:GROUND+m.z-rnd(0,40),vx:rnd(-20,20),vy:rnd(-40,-10),life:rnd(.5,.9),sz:rnd(6,10)});
+    part({k:'ring',z:m.z,x:m.x,y:GROUND+m.z,life:.5,sz:22,col:u.team?0xff5a3a:0x9a7aff})}
+  sfx('fire',u.x);
+}
 function startThrow(u,tx,tz){
   u.atkKind='throw';u.block=false;u.blockT=0;u.atkT=0;u.hit=false;u.throwX=tx;u.throwZ=tz;u.dir=Math.sign(tx-u.x)||u.dir;
   u.cd=SPEAR_THROW.atk*(G.ctrl===u.id?.9:1.1);u.throwCd=1.6;
@@ -703,10 +752,10 @@ function doHit(u){
   const reach=effRange(u)+14;
   let hits=[];
   if(ctrl){
-    for(const o of G.units){if(o.team===u.team||o.dead||o.hidden)continue;const dx=(o.x-u.x)*u.dir;if(dx>-6&&dx-radius(o)<reach&&Math.abs(o.y-u.y)<40)hits.push([dx,o])}
+    for(const o of G.units){if(o.team===u.team||o.dead||o.hidden)continue;const dx=(o.x-u.x)*u.dir;if(dx>-6&&dx-radius(o)<reach&&Math.abs(o.y-u.y)<40&&Math.abs(o.z-u.z)<=LANE+2)hits.push([dx,o])}
     hits.sort((a,b)=>a[0]-b[0]);hits=hits.slice(0,u.type==='sword'?2:1).map(h=>h[1]);
     const e=1-u.team;if(!hits.length&&Math.abs(STATUE[e]-u.x)-44<reach&&G.teams[e].statue.hp>0)hits=[statueObj(e)];
-  }else{const tg=getRef(u.tgt);if(tg&&Math.abs(tg.x-u.x)-radius(tg)<=reach)hits=[tg]}
+  }else{const tg=getRef(u.tgt);if(tg&&Math.abs(tg.x-u.x)-radius(tg)<=reach&&(tg.statue!==undefined||Math.abs(tg.z-u.z)<=LANE+2))hits=[tg]}
   for(const tg of hits){hurt(tg,d,u,{kb:u.type==='spear'?90:crit?140:40,up:crit?160:0});sfx('hit',u.x)}
 }
 function area(team,x,r,d,src,o){
@@ -715,12 +764,13 @@ function area(team,x,r,d,src,o){
 }
 const mortarTime=dx=>Math.max(.45,Math.sqrt(2*Math.abs(dx)*1.2/GRAV));
 function mortarPath(x,y,tx,tz){const Tt=mortarTime(tx-x),ty=GROUND+tz-6;return {vx:(tx-x)/Tt,vy:(ty-y-.5*GRAV*Tt*Tt)/Tt,Tt}}
-function lobFire(team,x,y,tx,tz,d,src,aoe){const m=mortarPath(x,y,tx,tz);G.proj.push({k:'fire',x,y,vx:m.vx,vy:m.vy,team,dmg:d,src,z:tz,stuck:0,life:5,aoe})}
-function fireArrow(team,hx,hy,tg,d,src,fire=false){
+function lobFire(team,x,y,tx,tz,d,src,aoe,z0){const m=mortarPath(x,y,tx,tz),zs=z0??tz;G.proj.push({k:'fire',x,y,vx:m.vx,vy:m.vy,team,dmg:d,src,z:zs,zv:(tz-zs)/m.Tt,stuck:0,life:5,aoe})}
+function fireArrow(team,hx,hy,tg,d,src,fire=false,z0){
   const ts=tg.statue!==undefined?3:TYPES[tg.type].size;
-  const tx=tg.x+rnd(-10,10)+(tg.moving?tg.dir*TYPES[tg.type].spd*.4:0),ty=GROUND+tg.z-(tg.y||0)-(tg.statue!==undefined?90:28*ts);
-  const dx=tx-hx,Tt=.5+Math.abs(dx)/850;
-  G.proj.push({k:'arrow',x:hx,y:hy,vx:dx/Tt,vy:(ty-hy-.5*GRAV*Tt*Tt)/Tt,team,dmg:d,src,z:tg.z||0,stuck:0,life:6,fire});
+  const flight=dx=>.5+Math.abs(dx)/850,v=tg.moving&&tg.statue===undefined?tg.dir*TYPES[tg.type].spd:0;
+  let tx=tg.x;for(let i=0;i<2;i++)tx=tg.x+v*flight(tx-hx);tx+=rnd(-6,6);
+  const ty=GROUND+tg.z-(tg.y||0)-(tg.statue!==undefined?90:28*ts),dx=tx-hx,Tt=flight(dx);
+  const zs=z0??(tg.z||0);G.proj.push({k:'arrow',x:hx,y:hy,vx:dx/Tt,vy:(ty-hy-.5*GRAV*Tt*Tt)/Tt,team,dmg:d,src,z:zs,zv:((tg.z||0)-zs)/Tt,stuck:0,life:6,fire});
 }
 const VISION=340,BASE_SIGHT=700;
 function canSee(team,x){if(Math.abs(x-STATUE[team])<BASE_SIGHT)return true;for(const u of G.units)if(u.team===team&&!u.dead&&!u.hidden&&Math.abs(u.x-x)<VISION)return true;return false}
@@ -763,8 +813,9 @@ function ai(team,dt){
   if(miners<wantM&&tm.queue.miner<1&&tm.gold>=150&&!(foeS>myS*1.5&&army.length<3))train(team,'miner');
   else{
     if(!A.want){
-      const w={sword:4,archer:3};if(G.t>45)w.spear=2.5;if(G.t>95)w.mage=1.6;if(G.t>160)w.giant=1.1;
+      const w={sword:4,archer:3};if(G.t>45||D.focus==='spear')w.spear=2.5;if(G.t>95||D.focus==='mage'&&G.t>40)w.mage=1.6;if(G.t>160||D.focus==='giant'&&G.t>70)w.giant=1.1;
       const archers=foes.filter(u=>u.type==='archer').length;if(archers>3)w.sword+=3;
+      if(D.focus&&w[D.focus])w[D.focus]*=3;
       for(const k in w)if(!D.units.includes(k))delete w[k];if(!Object.keys(w).length)w.sword=1;
       let sum=0;for(const k in w)sum+=w[k];let r=Math.random()*sum;for(const k in w){r-=w[k];if(r<=0){A.want=k;break}}
       A.wantT=0;
@@ -781,6 +832,8 @@ function ai(team,dt){
   else if((myS>foeS*1.35&&army.length>=5)||(G.t>A.push&&army.length>=4)){cmd=2;A.push=G.t+80+rnd(0,50)}
   else if(threat||myS<foeS)cmd=(tm.statue.hp<tm.statue.max*.25&&myS<foeS*.35)?0:1;
   else cmd=1;
+  const atGates=foes.filter(u=>Math.abs(u.x-home)<560).length;
+  if(atGates>=2&&myS<foeS*.55&&army.length<6)cmd=0;
   if(G.survive&&team===1&&G.t>20&&army.length>=3)cmd=2;
   setCommand(team,cmd);
   // abilities
@@ -805,17 +858,20 @@ function moveTo(u,x,spd,dt){
 function updUnit(u,dt){
   const T=TYPES[u.type],tm=G.teams[u.team];
   u.flash-=dt;u.cd-=dt;u.hpShow-=dt;u.dashCd-=dt;u.dash-=dt;
-  u.throwCd-=dt;u.blockT-=dt;
+  u.throwCd-=dt;u.blockT-=dt;u.sumCd-=dt;
+  if(u.type==='minion'){u.life-=dt;if(u.life<=0){u.dead=true;for(let j=0;j<8;j++)part({k:'smoke',z:u.z,x:u.x+rnd(-6,6),y:GROUND+u.z-rnd(0,40),vx:rnd(-20,20),vy:rnd(-40,-10),life:rnd(.4,.8),sz:rnd(5,9)});if(G.ctrl===u.id)G.ctrl=null;return}}
   if(u.type==='spear'&&!u.dead){
     const mx=spearMax(u);
     if(u.ammo<mx&&Math.abs(u.x-STATUE[u.team])<90&&u.atkKind!=='throw'){u.ammo=mx}
     if(u.ammo<mx&&u.y<5)for(const p of G.proj)if(p.k==='jav'&&p.stuck&&p.team===u.team&&p.life>0&&Math.abs(p.x-u.x)<16){p.life=0;u.ammo++;if(u.team===0&&!G.demo){float(u.x,GROUND+u.z-74,'Lanza recuperada','#f1e7d3',13,u.z);sfx('train')}break}
   }
+  if(GORE&&u.hp<u.max*.4&&!u.hidden&&Math.random()<dt*2.5)part({k:'blood',z:u.z,x:u.x+rnd(-3,3),y:GROUND+u.z-u.y-rnd(15,35)*T.size,vx:rnd(-8,8),vy:rnd(-15,5),life:1.5,sz:rnd(1.2,2),gy:GROUND+u.z});
   if(u.burn>0){u.burn-=dt;u.hp-=9*dt;u.hpShow=Math.max(u.hpShow,.5);if(Math.random()<dt*16)part({k:'ember',z:u.z,x:u.x+rnd(-5,5)*T.size,y:GROUND+u.z-u.y-rnd(5,50)*T.size,vx:rnd(-10,10),vy:rnd(-60,-25),life:rnd(.3,.6),sz:rnd(1.5,3)});
     if(u.hp<=0){kill(u,null,u.dir,{});return}}
   if(u.y>0||u.vy>0){u.vy-=900*dt;u.y+=u.vy*dt;if(u.y<=0){if(u.vy<-280){dustRing(u.x,GROUND+u.z,6,T.size*.7)}u.y=0;u.vy=0}}
   if(u.vx){u.x+=u.vx*dt;u.vx*=Math.pow(.004,dt);if(Math.abs(u.vx)<3)u.vx=0}
   u.x=clamp(u.x,30,WORLD_W-30);
+  if(u.stun>0){u.stun-=dt;u.moving=false;u.atkT=-1;u.block=false;u.charge=0;return}
   if(G.over){u.moving=false;if(u.team===G.winner&&u.y===0){u.cheer-=dt;if(u.cheer<0){u.vy=rnd(220,320);u.cheer=rnd(.8,1.8)}}if(u.atkT>=0)tickAttack(u,dt);return}
   if(G.ctrl===u.id){controlled(u,dt);return}
   if(u.atkT>=0){u.moving=false;tickAttack(u,dt);return}
@@ -829,7 +885,7 @@ function depositGold(u){
 }
 function minerAI(u,dt){
   const tm=G.teams[u.team],fwd=u.team?-1:1,home=STATUE[u.team],spd=TYPES.miner.spd*(tm.rage>0?1.3:1);
-  if(G.command[u.team]===0){const gx=home-fwd*20;if(moveTo(u,gx,spd,dt)){u.hidden=true;u.hp=Math.min(u.max,u.hp+14*dt)}return}
+  if(G.command[u.team]===0){const gx=home-fwd*20;if(moveTo(u,gx,spd,dt)){u.hidden=true;u.hp=Math.min(u.max,u.hp+14*dt);garrisonShoot(u)}return}
   u.hidden=false;
   if(u.carry>0||u.state==='toBase'){
     u.state='toBase';u.z=lerp(u.z,u.z0,Math.min(1,dt*1.5));
@@ -855,11 +911,7 @@ function soldierAI(u,dt){
     const gx=home-fwd*20;
     if(Math.abs(u.x-gx)<6){
       u.hidden=true;u.moving=false;u.hp=Math.min(u.max,u.hp+14*dt);
-      if(T.ranged&&u.cd<=0){const n=nearestEnemy(u);if(n&&n.t.statue===undefined&&Math.abs(n.t.x-home)<range+60){
-        const hx=home+fwd*6,hy=GROUND-205;u.cd=T.cd;const {d}=dmgOf(u);
-        if(u.type==='archer'){fireArrow(team,hx,hy,n.t,d,u.id,tierOf(u)>=3);sfx('bow',hx)}
-        else lobFire(team,hx,hy,n.t.x,n.t.z,d,u.id,T.aoe*G.mods[team].aoe)
-      }}
+      garrisonShoot(u);
       return;
     }
     u.hidden=false;moveTo(u,gx,spd*1.2,dt);return;
@@ -873,6 +925,7 @@ function soldierAI(u,dt){
   const n=nearestEnemy(u);let tg=null;
   if(n){if(cmd===2){if(n.d<Math.max(range+30,380))tg=n.t}else if(Math.abs(n.t.x-gx)<340||n.d<range)tg=n.t}
   let mspd=spd;
+  if(u.type==='mage'&&u.sumCd<=0&&n&&n.t.statue===undefined&&n.d<300)summonMinions(u);
   if(u.type==='spear'){
     // opening javelin throw
     if(tg&&tg.statue===undefined&&u.ammo>0&&u.throwCd<=0&&u.cd<=0){const d=Math.abs(tg.x-u.x)-radius(tg);if(d>55&&d<240){startThrow(u,tg.x+(tg.moving?tg.dir*TYPES[tg.type].spd*.35:0),tg.z);return}}
@@ -885,7 +938,10 @@ function soldierAI(u,dt){
   }
   if(tg){
     const dx=tg.x-u.x,d=Math.abs(dx)-radius(tg);const reach=range-((u.id%3)*3);
-    if(d<=reach){
+    const dz=tg.statue===undefined&&!T.ranged?tg.z-u.z:0;
+    if(Math.abs(dz)>5&&d<reach+60){u.z+=Math.sign(dz)*Math.min(Math.abs(dz),34*dt)}
+    if(d<=reach&&Math.abs(dz)>LANE-2&&!T.ranged){u.moving=false;u.dir=Math.sign(dx)||u.dir}
+    else if(d<=reach){
       if(!u.block)u.dir=Math.sign(dx)||u.dir;
       if(T.ranged&&d<40&&u.cd>.3&&tg.statue===undefined){moveTo(u,u.x-Math.sign(dx)*20,spd*.7,dt);u.dir=Math.sign(dx)||u.dir}
       else{u.moving=false;if(u.cd<=0&&!(u.blockT>0))startAttack(u,tg)}
@@ -902,9 +958,11 @@ function blockThreat(u,n){
 function controlled(u,dt){
   const T=TYPES[u.type],tm=G.teams[u.team],spd=T.spd*1.35*(tm.rage>0?1.3:1);
   u.hidden=false;
-  let mv=(inp.right?1:0)-(inp.left?1:0);
+  const special=inp.special;inp.special=false;
+  let mv=(inp.right?1:0)-(inp.left?1:0);const mz=(inp.down?1:0)-(inp.up?1:0);
+  if(mz&&u.dash<=0)u.z=clamp(u.z+mz*spd*.55*dt*(u.block?.5:1),-22,22);
   if(inp.dash&&u.dashCd<=0){u.dash=.3;u.dashCd=1.1;u.dashDir=mv||u.dir;dustRing(u.x,GROUND+u.z,6);sfx('swing',u.x);inp.dash=false}
-  if(inp.jump&&u.y===0&&u.vy===0){u.vy=GI(u)?300:390;sfx('jump',u.x);inp.jump=false}
+  if(inp.jump){if(u.y===0&&u.vy===0){u.vy=GI(u)?300:390;sfx('jump',u.x)}inp.jump=false}
   const busy=u.atkT>=0;
   if(u.dash>0){u.x+=u.dashDir*430*dt;u.dir=u.dashDir;u.moving=true;u.phase+=dt*18}
   else if(mv&&(!busy||u.y>0)){u.x+=mv*spd*dt*(busy||u.block?.4:1);if(!u.block)u.dir=mv;u.moving=true;u.phase+=dt*spd/(8.5*T.size)}
@@ -922,19 +980,21 @@ function controlled(u,dt){
     }
     return;
   }
+  if(u.type==='sword'||u.type==='minion')u.block=!!inp.block&&!(u.atkT>=0);
+  if(u.type==='mage'&&special){if(u.sumCd<=0)summonMinions(u);else if(u.team===0)toast(`Esbirros listos en ${Math.ceil(u.sumCd)} s`)}
   if(u.type==='spear'){
     u.block=!!inp.block&&!(u.atkT>=0);
-    if(inp.atk&&u.cd<=0&&!busy&&!u.block){
-      let near=false;for(const o of G.units){if(o.team===u.team||o.dead||o.hidden)continue;const dx=(o.x-u.x)*u.dir;if(dx>-6&&dx-radius(o)<effRange(u)+14){near=true;break}}
-      if(u.ammo>0&&!near){
+    const wantThrow=special;
+    if((inp.atk||wantThrow)&&u.cd<=0&&!busy&&!u.block){
+      if(u.ammo>0&&wantThrow){
         let tx,tz=u.z;
         if(inp.aimActive)tx=inp.mx;
         else{let best=null;for(const o of G.units){if(o.team===u.team||o.dead||o.hidden)continue;const dx=(o.x-u.x)*u.dir;if(dx>40&&dx<320&&(!best||dx<(best.x-u.x)*u.dir))best=o}tx=best?best.x:u.x+u.dir*220;if(best)tz=best.z}
         startThrow(u,tx,tz);
-      }else startAttack(u,null);
+      }else if(inp.atk)startAttack(u,null);
     }
   }
-  else if(inp.atk&&u.cd<=0&&!busy){startAttack(u,null);if(u.type==='mage')u.dir=Math.sign(inp.mx-u.x)||u.dir}
+  else if(inp.atk&&u.cd<=0&&!busy&&!u.block){startAttack(u,null);if(u.type==='mage')u.dir=Math.sign(inp.mx-u.x)||u.dir}
   if(u.type==='miner'&&u.carry>0){const home=STATUE[u.team]+(u.team?-52:52);if(Math.abs(u.x-home)<70)depositGold(u)}
 }
 
@@ -979,7 +1039,7 @@ function updProj(dt){
     if(p.delay>0){p.delay-=dt;continue}
     p.life-=dt;
     if(p.stuck){p.stuck+=dt;continue}
-    p.vy+=GRAV*(p.g??1)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    p.vy+=GRAV*(p.g??1)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.zv)p.z+=p.zv*dt;
     if((p.k==='fire'||p.k==='meteor'||p.fire)&&Math.random()<(p.k==='arrow'?.35:.8))part({k:'ember',z:p.z,x:p.x+rnd(-3,3),y:p.y+rnd(-3,3),vx:-p.vx*.1+rnd(-20,20),vy:-p.vy*.1+rnd(-20,20),life:rnd(.25,.5),sz:p.k==='meteor'?rnd(4,8):rnd(2,4)});
     if(p.k==='meteor'&&Math.random()<.5)part({k:'smoke',z:p.z,x:p.x,y:p.y,vx:0,vy:-10,life:1,sz:rnd(10,18)});
     const src=p.src?G.units.find(u=>u.id===p.src):null;
@@ -988,7 +1048,7 @@ function updProj(dt){
       for(const u of G.units){
         if(u.team===p.team||u.dead||u.hidden)continue;const s=TYPES[u.type].size;
         const by=GROUND+u.z-u.y;
-        if(Math.abs(p.x-u.x)<7*s+3&&p.y>by-62*s&&p.y<by+2){
+        if(Math.abs(p.x-u.x)<7*s+3&&p.y>by-62*s&&p.y<by+2&&Math.abs(p.z-u.z)<=9*s+5){
           if(p.k==='jav'){
             if(p.hitIds.includes(u.id))continue;
             p.hitIds.push(u.id);hurt(u,p.dmg,src,{fromX:p.x-p.vx*.05,kb:70,proj:true});p.dmg*=.75;if(--p.pierce<=0)p.life=0;sfx('hit',u.x);break;
@@ -996,7 +1056,7 @@ function updProj(dt){
           if(p.k==='arrow'){
             const front=(Math.sign(p.x-p.vx*.05-u.x)||u.dir)===u.dir;
             if(u.block&&front&&tierOf(u)>=3){p.team=u.team;p.src=u.id;p.vx=-p.vx*.75;p.vy=-Math.abs(p.vy)*.5-120;p.x+=Math.sign(p.vx)*8;sparks(p.x,p.y,6,u.z);sfx('clang',u.x);break}
-            hurt(u,p.dmg,src,{fromX:p.x-p.vx*.05,kb:25,arrow:true});p.life=0;if(p.team===0||!G.demo)sfx('hit',u.x)}
+            attachArrow(u,p);hurt(u,p.dmg,src,{fromX:p.x-p.vx*.05,kb:25,arrow:true});p.life=0;if(p.team===0||!G.demo)sfx('hit',u.x)}
           else{boom(p,src)}
           break;
         }
@@ -1014,7 +1074,7 @@ function updProj(dt){
 function boom(p,src){
   p.life=0;const r=p.aoe||60;const y=Math.min(p.y,GROUND);
   explodeFx(p.x,y,r);
-  area(p.team,p.x,r,p.dmg,src,{magic:true,kb:p.k==='meteor'?260:120,up:p.k==='meteor'?340:180,boom:true});
+  area(p.team,p.x,r,p.dmg,src,{magic:true,kb:p.k==='meteor'?260:120,up:p.k==='meteor'?340:180,boom:true,stun:p.k==='fire'?.8:0});
   G.shake=Math.max(G.shake,p.k==='meteor'?16:5);
   if(p.k==='meteor')G.slow=.35;
   sfx('boom',p.x);
@@ -1038,12 +1098,13 @@ function pose(u){
   else{fa1=.22+Math.sin(t*2+u.id)*.05;fa2=.55;ba1=-.12;ba2=.5}
   const p=u.atkT>=0?u.atkT/T.atk:-1;
   switch(u.type){
-    case 'sword':case 'miner':case 'giant':case 'boss':{
+    case 'sword':case 'miner':case 'giant':case 'boss':case 'minion':{
       let q=p;
       if(u.type==='miner'&&u.state==='mining'&&!mv&&q<0&&G&&G.ctrl!==u.id)q=(u.mineT*1.25)%1;
       if(GI(u)){fa2+=.2}
       if(q>=0){const r=swingPose(q,u.type==='miner'&&p<0?.5:T.hitAt,fa1,fa2,lean);fa1=r[0];fa2=r[1];lean=r[2];step=r[3];strike=r[4]}
-      wAng=fa1+fa2+(u.type==='sword'?.12:.08);
+      wAng=fa1+fa2+(u.type==='sword'||u.type==='minion'?.12:.08);
+      if(u.block&&q<0&&(u.type==='sword'||u.type==='minion')){fa1=.95;fa2=1.25;wAng=2.55;lean=.12}
       if(GI(u))bh='two';
       if(u.type==='miner'&&u.carry>0&&q<0){fa1=mv?fa1:.3}
       break;}
@@ -1107,17 +1168,19 @@ function pose(u){
 
 // ───────────────────────── ragdoll ─────────────────────────
 const RD_LINKS=[['head','neck'],['neck','hip'],['sh','e0'],['e0','h0'],['sh','e1'],['e1','h1'],['hip','k0'],['k0','f0'],['hip','k1'],['k1','f1'],['head','hip'],['neck','sh']];
-function makeRagdoll(u,dir,power){
+function makeRagdoll(u,dir,power,o={}){
+  const arrowDeath=!!o.arrow&&!o.boom;
   const J=pose(u),T=TYPES[u.type],s=T.size,bx=u.x,by=GROUND+u.z-u.y;
   const pts={};const dt=1/60;
   for(const k of ['head','neck','sh','hip','e0','h0','e1','h1','k0','f0','k1','f1']){
     const x=bx+J[k][0]*u.dir*s,y=by+J[k][1]*s;
     const up=(k==='head'||k==='neck'||k==='sh')?1:k==='hip'?.6:.3;
-    const vx=dir*rnd(90,190)*power*up/Math.sqrt(s)+rnd(-20,20),vy=-rnd(80,200)*power*up/Math.sqrt(s);
+    let vx=dir*rnd(90,190)*power*up/Math.sqrt(s)+rnd(-20,20),vy=-rnd(80,200)*power*up/Math.sqrt(s);
+    if(arrowDeath){if(k==='head'||k==='neck'||k==='sh'){vx=dir*rnd(50,95);vy=-rnd(10,50)}else if(k==='hip'){vx=dir*rnd(15,35);vy=rnd(0,20)}else if(k==='k0'||k==='k1'){vx=-dir*rnd(30,70);vy=-rnd(0,30)}else{vx=rnd(-10,10);vy=0}}
     pts[k]={x,y,px:x-vx*dt,py:y-vy*dt};
   }
   const links=RD_LINKS.map(([a,b])=>[a,b,Math.hypot(pts[a].x-pts[b].x,pts[a].y-pts[b].y)]);
-  G.ragdolls.push({pts,links,team:u.team,type:u.type,s,dir:u.dir,gy:GROUND+u.z,z:u.z,t:0,acc:0,wAng:J.wAng,rank:u.rank});
+  G.ragdolls.push({pts,links,team:u.team,type:u.type,s,dir:u.dir,gy:GROUND+u.z,z:u.z,t:0,acc:0,wAng:J.wAng,rank:u.rank,arrows:u.arrows||[],pool:GORE?{r:0,max:(8+rnd(0,6))*s*(GI(u)?1.3:1)}:null});
   if(G.ragdolls.length>70)G.ragdolls.shift();
 }
 function updRagdolls(dt){
@@ -1130,14 +1193,17 @@ function updRagdolls(dt){
       for(let it=0;it<5;it++)for(const [a,b,L] of r.links){const A=r.pts[a],B=r.pts[b];const dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy)||.001,k=(d-L)/d*.5;A.x+=dx*k;A.y+=dy*k;B.x-=dx*k;B.y-=dy*k}
     }
   }
+  for(const r of G.ragdolls){if(r.pool&&r.t>1)r.pool.r=Math.min(r.pool.max,r.pool.r+dt*r.pool.max/3);
+    if(r.t>=9&&r.pool&&r.pool.r>1&&G.decals.length<320)G.decals.push({k:'pool',x:r.pts.hip.x,y:r.gy,r:r.pool.r,a:1})}
   G.ragdolls=G.ragdolls.filter(r=>r.t<9);
 }
 
 // ───────────────────────── fx update ─────────────────────────
+function dropLen(d){return ({sword:[22,25,27,30][d.tier],xiphos:16,spear:50,miner:22,archer:28,mage:42,giant:30,boss:30})[d.k]*(d.s||1)}
 function updFx(dt){
   for(const p of P){
     p.life-=dt;
-    if(p.k==='blood'){p.vy+=600*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.y>=p.gy){p.life=0;if(G.decals.length<260)G.decals.push({k:'blood',x:p.x,y:p.gy+rnd(-1,1),r:rnd(1.5,3.5),a:.8})}}
+    if(p.k==='blood'){p.vy+=600*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.y>=p.gy){p.life=0;if(G.decals.length<260)G.decals.push({k:'blood',x:p.x,y:p.gy+rnd(-1,1),r:rnd(1.5,4.5),a:1})}}
     else if(p.k==='debris'){p.vy+=800*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=dt*6;const fl=GROUND+(p.z||0);if(p.y>fl){p.y=fl;p.vy*=-.3;p.vx*=.6}}
     else if(p.k==='gold'||p.k==='spark'){p.vy+=500*dt;p.x+=p.vx*dt;p.y+=p.vy*dt}
     else if(p.k==='ember'){p.vy+=60*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.97;p.vy*=.97}
@@ -1145,7 +1211,13 @@ function updFx(dt){
   }
   P=P.filter(p=>p.life>0);
   for(const f of F){f.life-=dt;f.y-=28*dt}F=F.filter(f=>f.life>0);
-  for(const d of G.decals)d.a-=dt*(d.k==='scorch'?.05:.04);G.decals=G.decals.filter(d=>d.a>0);
+  for(const d of G.decals)d.a-=dt*(d.k==='scorch'?.05:d.k==='pool'?.024:.03);G.decals=G.decals.filter(d=>d.a>0);
+  if(G.drops){for(const d of G.drops){d.t+=dt;if(d.rest)continue;d.vh-=800*dt;d.x+=d.vx*dt;d.h+=d.vh*dt;d.ang+=d.va*dt;
+    if(d.h<=2&&d.vh<0){const L=dropLen(d);d.rest=true;
+      if((d.k==='spear'||d.k==='sword'||d.k==='xiphos')&&Math.random()<.6){d.ang=Math.PI/2+rnd(-.35,.35);d.h=L*.62}
+      else if((d.k==='giant'||d.k==='boss')&&Math.random()<.4){d.ang=-Math.PI/2+rnd(-.2,.2);d.h=-L*.12}
+      else{d.ang=Math.random()<.5?rnd(-.1,.1):Math.PI+rnd(-.1,.1);d.h=1.5}}}
+    G.drops=G.drops.filter(d=>d.t<26)}
   updRagdolls(dt);
   G.shake*=Math.pow(.02,dt);if(G.shake<.2)G.shake=0;
 }
@@ -1223,7 +1295,7 @@ function unit3D(u,tier,main){
   const T=TYPES[u.type],s=T.size,d=u.dir,J=pose(u),tm=u.team,k=s*SC,t=G?G.t:0,gi=GI(u);
   const bx=u.x*SC,by=u.y*SC,bz=u.z*ZS;
   const P=(p,side)=>[bx+p[0]*d*k,by-p[1]*k,bz+side*k];
-  const ink=u.flash>0?C.flash:C.ink[tm],acc=C.acc[tm],trim=C.trim[tm];
+  const ink=u.flash>0?C.flash:u.type==='minion'?[0x2a1838,0x3a1020][tm]:C.ink[tm],acc=C.acc[tm],trim=C.trim[tm];
   const R=(gi?1.8:1.5)*k,hr=(gi?7.5:6.8)*k;
   const aimArm=(u.type==='archer'&&(J.draw>0||u.atkT>=0||u.charge>0))||gi;
   const bs=aimArm?1.2:-3.4;
@@ -1237,7 +1309,8 @@ function unit3D(u,tier,main){
   seg('limb',hipB,hipF,R*.9,ink);seg('limb',shB,shF,R*.85,ink);
   for(const [a,b,c] of [[hipF,kF,fF],[hipB,kB,fB],[shF,eF,hF],[shB,eB,hB]]){seg('limb',a,b,R,ink);seg('limb',b,c,R*.9,ink);ball('joint',b,R*.98,ink);ball('joint',c,R*1.05,ink)}
   ball('joint',hipF,R,ink);ball('joint',hipB,R,ink);ball('joint',shF,R,ink);ball('joint',shB,R,ink);
-  if(tm===1)ball('glow',[head[0]+d*hr*.55,head[1]+hr*.12,head[2]+hr*.55],hr*.14,0xff7a5a);
+  if(main&&u.arrows&&u.arrows.length){const SD={hip:0,neck:0,head:0,sh:0,k0:2.4,f0:2.4,k1:-2.4,f1:-2.4,e0:3.4,h0:3.6,e1:bs,h1:bs};drawStuck(u.arrows,n=>P(J[n],SD[n]),d)}
+  if(tm===1||u.type==='minion')ball('glow',[head[0]+d*hr*.55,head[1]+hr*.12,head[2]+hr*.55],hr*.16,u.type==='minion'?C.orb[tm]:0xff7a5a);
   // gear
   qL.setFromAxisAngle(ZAX,-J.lean*d);
   const wv=[Math.sin(J.wAng)*d,-Math.cos(J.wAng),0],pv=[-wv[1],wv[0],0];
@@ -1309,6 +1382,9 @@ function unit3D(u,tier,main){
     const br=[head[0],head[1]+hr*.55,head[2]];put('wcyl',br[0],br[1],br[2],qL,hr*1.8,.6*k,hr*1.8,trim);
     seg('wcone',br,[head[0]-d*hr*1.2+Math.sin(t*3+u.id)*.3*k,head[1]+hr*(3+tier*.25),head[2]],hr*1.05,trim);
     if(tier>=2)put('band',br[0],br[1]+.8*k,br[2],qL,hr*1.02,hr*.9,hr*1.02,acc);
+  }else if(u.type==='minion'){
+    const base=A(hF,wv,2),tip=A(hF,wv,15);seg('mbox',base,tip,1.6*k,0x5a5560,.4*k);if(main)trailPush(u,hF,tip,J.strike,C.orb[tm]);
+    for(let i=0;i<3;i++){const a=Math.PI*(.2+i*.3);seg('limb',[head[0]-d*Math.cos(a)*hr*.8,head[1]+Math.sin(a)*hr*.8,head[2]],[head[0]-d*Math.cos(a)*hr*1.4,head[1]+Math.sin(a)*hr*1.3,head[2]],R*.3,ink)}
   }else{
     const tr=u.type==='boss'?3:tier,tip=A(hF,wv,26);
     if(tr<=1){seg('taper',A(hF,wv,-4),tip,2.8*k,C.wood);
@@ -1326,12 +1402,20 @@ function unit3D(u,tier,main){
   }
 }
 
+function mixHex(a,b,t){const f=(sh)=>Math.round(((a>>sh)&255)+(((b>>sh)&255)-((a>>sh)&255))*t);return (f(16)<<16)|(f(8)<<8)|f(0)}
+function drawStuck(list,Pp,dir){
+  for(const ar of list){const [a,b]=SEGS[ar.s],A=Pp(a),B=Pp(b),px=A[0]+(B[0]-A[0])*ar.t,py=A[1]+(B[1]-A[1])*ar.t,pz=A[2]+(B[2]-A[2])*ar.t;
+    const an=Math.atan2(-(B[1]-A[1]),B[0]-A[0])+ar.d*dir,dx=Math.cos(an),dy=-Math.sin(an),tail=[px-dx*1.1,py-dy*1.1,pz];
+    seg('wcyl',[px+dx*.15,py+dy*.15,pz],tail,.045,C.wood);seg('wbox',tail,[tail[0]+dx*.4,tail[1]+dy*.4,pz],.03,C.acc[ar.team],.22);if(ar.f)ball('glow',tail,.1,0xff8a3a)}
+}
 function ragdoll3D(r){
   const a=clamp((9-r.t)/2.5,0,1);if(a<=0)return;
-  const s=r.s,sink=(1-a)*1.2*s,gi=r.type==='giant'||r.type==='boss',R=(gi?1.8:1.5)*s*SC,ink=C.ink[r.team];
+  const s=r.s,sink=(1-a)*1.2*s,gi=r.type==='giant'||r.type==='boss',R=(gi?1.8:1.5)*s*SC,ink=GORE?mixHex(C.ink[r.team],0x4a0a08,Math.min(.28,r.t/8)):C.ink[r.team];
+  if(r.pool&&r.pool.r>.5){const rr=r.pool.r*SC;put('decal',r.pts.hip.x*SC,.037,r.z*ZS,QI,rr*1.9,1,rr*.62,0x520a07)}
   const side={e0:3.4,h0:3.6,k0:2.4,f0:2.4,e1:-3.4,h1:-3.6,k1:-2.4,f1:-2.4};
   const Q={};for(const k in r.pts){const p=r.pts[k];Q[k]=[p.x*SC,(r.gy-p.y)*SC-sink,r.z*ZS+(side[k]||0)*s*SC]}
   for(const [A_,B_] of RD_LINKS){if(A_==='head'&&B_==='hip')continue;if(A_==='neck'&&B_==='sh')continue;seg('limb',Q[A_],Q[B_],R,ink);ball('joint',Q[B_],R,ink)}
+  if(r.arrows&&r.arrows.length)drawStuck(r.arrows,k=>Q[k],r.dir);
   const hr=(gi?7.5:6.8)*s*SC;ball('head',Q.head,hr,ink);put('band',Q.head[0],Q.head[1],Q.head[2],QI,hr*1.05,hr*1.3,hr*1.05,C.acc[r.team]);
 }
 
@@ -1465,7 +1549,7 @@ const cloudM=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opac
 // ── statues & mines
 function mkMesh(geo,mat,parent,x,y,z){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;parent.add(m);return m}
 function beam(geo,mat,parent,a,b,r,rz){_d.set(b[0]-a[0],b[1]-a[1],b[2]-a[2]);const L=_d.length();_d.normalize();const m=mkMesh(geo,mat,parent,(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);m.quaternion.setFromUnitVectors(UP,_d);m.scale.set(r,L,rz??r);return m}
-function buildStatue(team){
+function buildStatue(team,style){
   const f=team?-1:1,g=new THREE.Group();g.position.set(STATUE[team]*SC,0,STZ);scene.add(g);
   const stoneM=new THREE.MeshStandardMaterial({color:team?0x6e625d:0xaaa18f,roughness:.95,flatShading:true});
   const darkM=new THREE.MeshStandardMaterial({color:team?0x463d39:0x7a7163,roughness:1,flatShading:true});
@@ -1477,13 +1561,42 @@ function buildStatue(team){
   mkMesh(new THREE.CylinderGeometry(6.7,6.7,.35,8),accM,g,0,4.5,0);
   const fig=new THREE.Group();fig.position.set(0,6.4,0);g.add(fig);
   const pt=(x,h,z)=>[x*SC,(h-60)*SC,z];
-  const limbs=[[pt(0,116,-1),pt(-f*10,88,-1),pt(-f*20,62,-1)],[pt(0,116,1),pt(f*14,88,1),pt(f*22,62,1)],[pt(f*3,168,.9),pt(f*24,180,.9),pt(f*30,210,.9)],[pt(f*3,168,1.3),pt(-f*16,150,1.6),pt(-f*4,132,1.8)]];
-  for(const L of limbs){beam(cyl,stoneM,fig,L[0],L[1],.6);beam(cyl,stoneM,fig,L[1],L[2],.55);for(const p of L)mkMesh(sph,stoneM,fig,...p).scale.setScalar(.62)}
-  beam(cyl,stoneM,fig,pt(0,116,0),pt(f*3,172,0),.8);mkMesh(sph,stoneM,fig,...pt(0,116,0)).scale.set(1.1,.8,1.3);
-  mkMesh(sph,stoneM,fig,...pt(f*5,190,0)).scale.setScalar(1.45);
-  beam(box,stoneM,fig,pt(f*30,212,.9),pt(f*38,278,.9),.5,.2);beam(box,accM,fig,pt(f*20,214,.9),pt(f*42,208,.9),.3,.35);
-  const sh=mkMesh(new THREE.CylinderGeometry(1.8,1.8,.35,18),trimM,fig,...pt(-f*6,132,2.3));sh.rotation.x=Math.PI/2;sh.scale.set(1,1,1.3);
-  mkMesh(sph,accM,fig,...pt(-f*6,132,2.5)).scale.setScalar(.35);
+  const glowM=new THREE.MeshBasicMaterial({color:C.orb[team]}),hornM=new THREE.MeshStandardMaterial({color:0x2a2420,roughness:.7}),woodM=new THREE.MeshStandardMaterial({color:0x5a4030,roughness:.9});
+  const bulk=style==='giant'?1.55:1,limb=(L,r=.6)=>{beam(cyl,stoneM,fig,L[0],L[1],r*bulk);beam(cyl,stoneM,fig,L[1],L[2],r*.92*bulk);for(const p of L)mkMesh(sph,stoneM,fig,...p).scale.setScalar(.62*bulk)};
+  limb([pt(0,116,-1),pt(-f*10,88,-1),pt(-f*20,62,-1)]);limb([pt(0,116,1),pt(f*14,88,1),pt(f*22,62,1)]);
+  beam(cyl,stoneM,fig,pt(0,116,0),pt(f*3,172,0),.8*bulk);mkMesh(sph,stoneM,fig,...pt(0,116,0)).scale.set(1.1*bulk,.8*bulk,1.3*bulk);
+  const head=pt(f*5,190,0),hr=1.45*(style==='giant'?1.2:1);mkMesh(sph,stoneM,fig,...head).scale.setScalar(hr);
+  const swordUp=(metal)=>{limb([pt(f*3,168,.9),pt(f*24,180,.9),pt(f*30,210,.9)]);beam(box,metal||stoneM,fig,pt(f*30,212,.9),pt(f*38,278,.9),.5,.2);beam(box,accM,fig,pt(f*20,214,.9),pt(f*42,208,.9),.3,.35)};
+  const shield=(r=1.8,z=2.3)=>{limb([pt(f*3,168,1.3),pt(-f*16,150,1.6),pt(-f*4,132,1.8)]);const sh=mkMesh(new THREE.CylinderGeometry(r,r,.35,18),trimM,fig,...pt(-f*6,132,z));sh.rotation.x=Math.PI/2;sh.scale.set(1,1,1.3);mkMesh(sph,accM,fig,...pt(-f*6,132,z+.2)).scale.setScalar(.35)};
+  let arrow=null;
+  if(style==='order'){swordUp();shield();
+    const cr=mkMesh(new THREE.CylinderGeometry(hr*.95,hr*.85,hr*.55,10,1,true),accM,fig,head[0],head[1]+hr*.85,head[2]);
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2,c=mkMesh(new THREE.ConeGeometry(.22,.7,6),accM,fig,head[0]+Math.cos(a)*hr*.9,head[1]+hr*1.35,head[2]+Math.sin(a)*hr*.9);c.castShadow=false}}
+  else if(style==='sword'){swordUp();limb([pt(f*3,168,1.3),pt(f*18,150,1.4),pt(f*30,156,1.5)]);
+    const bd=mkMesh(new THREE.TorusGeometry(hr*1.02,.16,6,18),accM,fig,head[0],head[1]+hr*.25,head[2]);bd.rotation.x=Math.PI/2}
+  else if(style==='archer'){
+    const grip=pt(f*40,178,1.4),hand=pt(f*6,180,1.2);
+    limb([pt(f*3,168,1.2),pt(f*22,174,1.3),grip]);limb([pt(f*3,168,-.4),pt(-f*14,172,.2),hand]);
+    const bg=new THREE.TorusGeometry(1,.06,6,24,Math.PI*.9);bg.rotateZ(-Math.PI*.45);bg.translate(-1,0,0);
+    const bow=mkMesh(bg,woodM,fig,...grip);bow.scale.setScalar(4.4);bow.rotation.z=f>0?0:Math.PI;
+    const tip=sg=>[grip[0]-f*.843*4.4,grip[1]+sg*.988*4.4,grip[2]],strM=new THREE.MeshBasicMaterial({color:0xd8ccb0});
+    beam(cyl,strM,fig,tip(1),hand,.05);beam(cyl,strM,fig,tip(-1),hand,.05);
+    arrow=new THREE.Group();fig.add(arrow);const ae=[grip[0]+f*1.2,grip[1],grip[2]];beam(cyl,woodM,arrow,hand,ae,.09);const ah=mkMesh(new THREE.ConeGeometry(.22,.7,6),accM,arrow,ae[0]+f*.3,ae[1],ae[2]);ah.rotation.z=-f*Math.PI/2;
+    beam(cyl,trimM,fig,pt(-f*10,178,-1.2),pt(-f*16,130,-1.2),.45);
+    const hood=mkMesh(new THREE.ConeGeometry(hr*1.05,hr*2.2,10),trimM,fig,head[0]-f*hr*.6,head[1]+hr*.4,head[2]);hood.rotation.z=f*1.1}
+  else if(style==='spear'){limb([pt(f*3,168,.9),pt(f*20,176,.9),pt(f*34,186,.9)]);beam(cyl,woodM,fig,pt(-f*16,160,.9),pt(f*70,232,.9),.14);
+    const tp=mkMesh(new THREE.ConeGeometry(.35,1.4,8),accM,fig,...pt(f*74,235,.9));tp.rotation.z=-f*.9;shield(2.6,2.4);
+    mkMesh(new THREE.SphereGeometry(1,14,8,0,Math.PI*2,0,Math.PI/2),accM,fig,head[0],head[1]+hr*.1,head[2]).scale.setScalar(hr*1.12);
+    beam(new THREE.ConeGeometry(1,1,8),trimM,fig,[head[0]+f*.4,head[1]+hr*1.1,head[2]],[head[0]-f*2.4,head[1]+hr*.6,head[2]],.5)}
+  else if(style==='mage'){limb([pt(f*3,168,.9),pt(f*20,190,.9),pt(f*28,220,.9)]);beam(cyl,woodM,fig,pt(f*28,172,.9),pt(f*28,292,.9),.2);
+    mkMesh(sph,glowM,fig,...pt(f*28,298,.9)).scale.setScalar(.9);limb([pt(f*3,168,1.3),pt(-f*14,176,1.4),pt(-f*28,192,1.5)]);
+    const hat=mkMesh(new THREE.ConeGeometry(hr*1.1,hr*3,10),trimM,fig,head[0]-f*.3,head[1]+hr*1.9,head[2]);hat.rotation.z=f*.25;
+    const brim=mkMesh(cyl,trimM,fig,head[0],head[1]+hr*.55,head[2]);brim.scale.set(hr*1.9,.15,hr*1.9)}
+  else if(style==='giant'){limb([pt(f*3,168,1.2),pt(f*22,160,1.2),pt(f*14,198,1.2)]);beam(new THREE.CylinderGeometry(1,.45,1,8),woodM,fig,pt(f*14,196,1.2),pt(-f*34,246,1.2),1.1);
+    limb([pt(f*3,168,-1.2),pt(-f*12,140,-1.3),pt(-f*6,112,-1.3)])}
+  else{swordUp(new THREE.MeshStandardMaterial({color:0x3a3232,roughness:.5,metalness:.4}));limb([pt(f*3,168,1.3),pt(f*18,150,1.4),pt(f*30,156,1.5)]);
+    for(const sg of [-1,1])beam(new THREE.ConeGeometry(1,1,8),hornM,fig,[head[0],head[1]+hr*.5,head[2]+sg*hr*.6],[head[0]+f*.6,head[1]+hr*2,head[2]+sg*hr*1.3],.38);
+    for(const sg of [-1,1])mkMesh(sph,new THREE.MeshBasicMaterial({color:0xff4a2a}),fig,head[0]+f*hr*.8,head[1]+hr*.15,head[2]+sg*hr*.35).scale.setScalar(.2)}
   // banner
   const pole=mkMesh(cyl,new THREE.MeshStandardMaterial({color:0x2a2119}),g,-f*7.8,14.5,-1.5);pole.scale.set(.18,21,.18);
   const flagGeo=new THREE.PlaneGeometry(6.4,4,14,2);flagGeo.translate(3.2,0,0);
@@ -1501,9 +1614,11 @@ function buildStatue(team){
   }
   const rubble=new THREE.Group();g.add(rubble);rubble.visible=false;
   for(let i=0;i<12;i++){const m=mkMesh(new THREE.DodecahedronGeometry(1,0),darkM,rubble,(hash(i+team*9)-.5)*13,.6+hash(i*3)*.8,(hash(i*5+team)-.5)*8);m.scale.setScalar(1+hash(i*7)*1.6);m.rotation.set(hash(i)*3,hash(i*2)*3,0)}
-  return {team,f,g,fig,stoneM,base:new THREE.Color(team?0x6e625d:0xaaa18f),flagGeo,flagBase,flames,halos,lights,rubble,parts:[fig,flag,pole,...flames,...halos]};
+  return {team,f,g,fig,stoneM,style,arrow,base:new THREE.Color(team?0x6e625d:0xaaa18f),flagGeo,flagBase,flames,halos,lights,rubble,parts:[fig,flag,pole,...flames,...halos]};
 }
-const STG=[buildStatue(0),buildStatue(1)];
+const STG=[buildStatue(0,'order'),buildStatue(1,'chaos')];
+const statueStyle=t=>t===0?'order':G&&G.kind==='campaign'&&LEVELS[G.level]?LEVELS[G.level].faction:'chaos';
+function syncStatues(){for(let t=0;t<2;t++){const st=statueStyle(t);if(STG[t].style!==st){scene.remove(STG[t].g);STG[t]=buildStatue(t,st)}}}
 function buildMine(x){
   const g=new THREE.Group();g.position.set(x*SC,0,MINEZ);scene.add(g);
   const rockM=new THREE.MeshStandardMaterial({color:0x4a423b,roughness:1,flatShading:true}),goldM=new THREE.MeshStandardMaterial({color:0xe8b23a,roughness:.3,metalness:.85,emissive:0x3a2600,flatShading:true});
@@ -1550,6 +1665,7 @@ function lerpHex(out,a,b,t){return out.setHex(a).lerp(tmpC.setHex(b),t)}
 function proj(x,y,z){_v.set(x,y,z).project(camera);return [(_v.x+1)/2*cssW,(1-_v.y)/2*cssH,_v.z<1&&_v.z>-1]}
 function render3D(dt){
   if(!G)return;
+  syncStatues();
   updCam(dt);
   const dl=daylight(),nt=1-dl,dusk=clamp(1-Math.abs(dl-.5)*2.4,0,1);nightF=nt;
   // sky, fog and lights follow the day cycle
@@ -1582,7 +1698,15 @@ function render3D(dt){
   // dynamic content
   LIGHTS=[];PS=PS_MAIN;PS.begin();
   for(const u of G.units){
-    if(u.hidden)continue;
+    if(u.hidden){
+      if(!G.teams[u.team].statue.hp)continue;
+      const sl=wallSlot(u),fw=u.team?-1:1,ty=u.type==='mage'?'mage':'archer';
+      const fk=GARF.get(u.id)||{id:u.id,team:u.team,y:64,phase:0,moving:false,rank:0,flash:0,dash:0,carry:0,charge:0,state:'idle',mineT:0,hidden:false,ammo:0,block:false};GARF.set(u.id,fk);
+      Object.assign(fk,{type:ty,x:STATUE[u.team]+fw*sl.x,z:sl.z,dir:fw,aim:.32});
+      const since=G.t-(u.wallShot??-9),atk=TYPES[ty].atk,ha=TYPES[ty].hitAt*atk;
+      fk.atkT=since<atk-ha?ha+since:(u.cd>0&&u.cd<ha?ha-u.cd:-1);
+      unit3D(fk,ty==='archer'&&u.type==='archer'?tierOf(u):0,false);continue;
+    }
     unit3D(u,tierOf(u),true);
     const s=TYPES[u.type].size;
     if(G.ctrl===u.id){const r=16*s*SC*(1+.08*Math.sin(G.t*6));put('ring',u.x*SC,.07,u.z*ZS,QI,r,1,r*.7,hexA(0xe9b041,.9))}
@@ -1591,6 +1715,16 @@ function render3D(dt){
     if(G.teams[u.team].rage>0&&Math.random()<dt*3)emit([u.x*SC+rnd(-.5,.5),(u.y+rnd(10,50))*SC,u.z*ZS],{k:'ember',vx:rnd(-10,10),vy:rnd(-50,-20),life:.6,sz:2,col:0xff4020});
   }
   for(const r of G.ragdolls)ragdoll3D(r);
+  if(G.drops)for(const d of G.drops){
+    const L=dropLen(d)*SC,X=d.x*SC,Y=d.h*SC-Math.max(0,d.t-22)*.4,Z=d.z*ZS,dx=Math.cos(d.ang),dy=-Math.sin(d.ang),at=l=>[X+dx*l,Y+dy*l,Z],pv=[-dy,dx,0],off=(p,l)=>[p[0]+pv[0]*l,p[1]+pv[1]*l,p[2]];
+    const metal=[C.iron,C.steel,C.steel,C.gold][d.tier||0],tip=at(L);
+    if(d.k==='sword'||d.k==='xiphos'){seg('wcyl',at(-.35),at(.3),.07,C.dark);seg('mbox',at(.3),tip,(d.k==='xiphos'?.24:.18),d.k==='xiphos'?C.steel:metal,.04);seg('mbox',off(at(.3),-.45),off(at(.3),.45),.1,C.acc[d.team],.12)}
+    else if(d.k==='spear'){seg('wcyl',at(-.2),tip,.08,C.wood);seg('mcone',tip,at(L+.9),.22,[C.bronze,C.bronze,C.steel,C.gold][d.tier||0])}
+    else if(d.k==='miner'){seg('wcyl',at(0),tip,.08,C.wood);seg('mcone',tip,off(tip,-.8),.13,metal);seg('mcone',tip,off(tip,.6),.11,metal)}
+    else if(d.k==='archer'){if(d.rest){eul.set(-Math.PI/2,0,d.ang);qB.setFromEuler(eul)}else qB.setFromAxisAngle(ZAX,-d.ang);put(d.tier>=3?'marc':'warc',X,Math.max(Y,.12),Z,qB,1.5,1.5,1.9,d.tier>=3?C.gold:C.wood)}
+    else if(d.k==='mage'){seg('wcyl',at(0),tip,.08,C.wood);ball('wball',tip,.35,0x2a3440)}
+    else{seg('taper',at(0),tip,.28*(d.s||1)/2,C.wood)}
+  }
   for(const p of G.proj){
     if(p.delay>0)continue;
     const X=p.x*SC,Y=(GROUND+p.z-p.y)*SC,Z=p.z*ZS;
@@ -1605,7 +1739,7 @@ function render3D(dt){
     }else if(p.k==='fire'){const oc=C.orb[p.team];ball('glow',[X,Y,Z],.6,oc);ball('glow',[X,Y,Z],.3,0xffffff);LIGHTS.push({p:[X,Y,Z],col:oc,i:2,d:24})}
     else if(p.k==='meteor'){put('rock',X,Y,Z,QI,1.8,1.8,1.8,0x3a2a22);ball('glow',[X-.3,Y+.3,Z+.4],1.2,0xff8a3a);LIGHTS.push({p:[X,Y,Z],col:0xff6a20,i:4,d:60})}
   }
-  for(const d of G.decals){const z=(d.y-GROUND)*ZS;if(d.k==='blood'){const r=d.r*1.6*SC*Math.min(1,d.a*1.5);put('decal',d.x*SC,terrainH(d.x*SC,z)+.03,z,QI,r,1,r*.5,0x5a120e)}else{const r=d.r*SC*Math.min(1,d.a*2);put('decal',d.x*SC,.04,z,QI,r,1,r*.35,0x140e0a)}}
+  for(const d of G.decals){const z=(d.y-GROUND)*ZS;if(d.k==='pool'){const r=d.r*SC*Math.min(1,d.a*2.5);put('decal',d.x*SC,.036,z,QI,r*1.9,1,r*.62,0x520a07)}else if(d.k==='blood'){const r=d.r*1.6*SC*Math.min(1,d.a*1.5);put('decal',d.x*SC,terrainH(d.x*SC,z)+.03,z,QI,r,1,r*.5,0x5a120e)}else{const r=d.r*SC*Math.min(1,d.a*2);put('decal',d.x*SC,.04,z,QI,r,1,r*.35,0x140e0a)}}
   if(aiming&&inp.inside){const r=(aiming==='meteor'?120:130)*SC;put('ring',inp.mx*SC,.1,0,QI,r,1,6,hexA(canSee(0,inp.mx)?0x71b9ea:0xcf4632,.9))}
   const cu=G.ctrl!==null?G.units.find(o=>o.id===G.ctrl):null;
   if(cu&&cu.type==='mage'&&(inp.inside||coarse)){
@@ -1630,14 +1764,15 @@ function drawOverlay(){
   octx.textAlign='center';octx.lineJoin='round';
   for(const u of G.units){
     if(u.hidden)continue;const s=TYPES[u.type].size,boss=u.type==='boss';
-    const showHp=(u.hpShow>0&&u.hp<u.max)||boss;if(!showHp&&!u.rank&&G.ctrl!==u.id)continue;
+    const showHp=(u.hpShow>0&&u.hp<u.max)||boss;if(!showHp&&!u.rank&&G.ctrl!==u.id&&!(u.stun>0))continue;
     const [sx,sy,ok]=proj(u.x*SC,(u.y+74*s)*SC,u.z*ZS);if(!ok)continue;
     const w=boss?90:24*Math.sqrt(s);
     if(showHp){octx.globalAlpha=boss?1:clamp(u.hpShow,0,1);octx.fillStyle='rgba(10,8,6,.75)';octx.fillRect(sx-w/2-1,sy-1,w+2,boss?7:5);octx.fillStyle=u.team?'#cf4632':'#8fc45c';octx.fillRect(sx-w/2,sy,w*u.hp/u.max,boss?5:3);octx.globalAlpha=1}
     if(u.rank){octx.fillStyle='#e9b041';for(let i=0;i<u.rank;i++){const cx=sx+(i-(u.rank-1)/2)*8,cy=sy-5;octx.beginPath();octx.moveTo(cx-3.5,cy);octx.lineTo(cx,cy-3.5);octx.lineTo(cx+3.5,cy);octx.lineTo(cx,cy-1.8);octx.closePath();octx.fill()}}
+    if(u.stun>0){octx.fillStyle='#ffe07a';for(let i=0;i<3;i++){const a=G.t*6+i*2.094;octx.beginPath();octx.arc(sx+Math.cos(a)*10,sy-12+Math.sin(a)*3,2.3,0,7);octx.fill()}}
     if(G.ctrl===u.id){const by=sy-14+Math.sin(G.t*5)*2.5;octx.fillStyle='#e9b041';octx.beginPath();octx.moveTo(sx-6,by-7);octx.lineTo(sx+6,by-7);octx.lineTo(sx,by);octx.fill()}
   }
-  for(let t=0;t<2;t++){const st=G.teams[t].statue;if(st.hp<=0)continue;const [sx,sy,ok]=proj(STATUE[t]*SC,31,STZ);if(!ok)continue;
+  for(let t=0;t<2;t++){const st=G.teams[t].statue;if(st.hp<=0)continue;const [sx,sy,ok]=proj(STATUE[t]*SC,28,STZ);if(!ok)continue;
     octx.fillStyle='rgba(10,8,6,.75)';octx.fillRect(sx-51,sy-1,102,8);octx.fillStyle=t?'#cf4632':'#e9b041';octx.fillRect(sx-50,sy,100*st.hp/st.max,6)}
   for(const f of F){const z=f.z||0,[sx,sy,ok]=proj(f.x*SC,(GROUND+z-f.y)*SC,z*ZS);if(!ok)continue;
     octx.globalAlpha=clamp(f.life*1.5,0,1);octx.font=`700 ${f.size+2}px "Barlow Condensed", "Arial Narrow", sans-serif`;octx.lineWidth=3.5;octx.strokeStyle='rgba(10,8,6,.85)';octx.strokeText(f.txt,sx,sy);octx.fillStyle=f.col;octx.fillText(f.txt,sx,sy)}
@@ -1645,6 +1780,7 @@ function drawOverlay(){
   if(G.teams[0].rage>0&&!G.demo){octx.fillStyle=`rgba(200,40,20,${.06+.03*Math.sin(G.t*8)})`;octx.fillRect(0,0,cssW,cssH)}
 }
 const PS_MAIN=new PartSet(scene,true);
+const GARF=new Map();
 
 // ── 3D thumbnails for the deck and the armory
 let TH=null;
@@ -1707,13 +1843,13 @@ function ui(dt){
   document.querySelectorAll('#abils .cmd').forEach(b=>{const kx=b.dataset.a;b.querySelector('.cd').style.height=(tm.cool[kx]/ABIL[kx].cd*100)+'%';b.classList.toggle('poor',tm.mana<ABIL[kx].mana);b.classList.toggle('aim',aiming===kx)});
   const cu=G.ctrl!==null?G.units.find(u=>u.id===G.ctrl):null;
   $('#ctrlTag').hidden=!cu;if(cu)setTxt('ctrlName',TYPES[cu.type].n+(cu.rank?' '+'★'.repeat(cu.rank):'')+(cu.type==='miner'?` · bolsa ${Math.round(cu.carry)} oro`:cu.type==='spear'?(cu.ammo>0?` · lanzas ${cu.ammo}`:' · espada'):''));
-  $('#pad').hidden=!(cu&&coarse);document.body.classList.toggle('ctrlmode',!!(cu&&coarse));$('#padBlock').hidden=!(cu&&cu.type==='spear');
+  $('#pad').hidden=!(cu&&coarse);document.body.classList.toggle('ctrlmode',!!(cu&&coarse));$('#padBlock').hidden=!(cu&&(cu.type==='spear'||cu.type==='sword'||cu.type==='minion'));$('#padSpecial').hidden=!(cu&&(cu.type==='spear'||cu.type==='mage'));if(cu)setTxt('padSpecial',cu.type==='spear'?'🎯':'✦');
   $('#timerChip').hidden=!G.survive;if(G.survive)setTxt('timer',fmt(Math.max(0,G.survive-G.t)));
   drawMini();
 }
 
 // ───────────────────────── input ─────────────────────────
-const inp={left:false,right:false,jump:false,dash:false,atk:false,block:false,mx:0,px:0,my:0,sx:0,sy:0,inside:false,aimActive:false};
+const inp={left:false,right:false,up:false,down:false,jump:false,dash:false,atk:false,block:false,special:false,mx:0,px:0,my:0,sx:0,sy:0,inside:false,aimActive:false};
 const coarse=window.matchMedia('(pointer: coarse)').matches;
 let hoverU=null,drag=null;
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plG=new THREE.Plane(new THREE.Vector3(0,1,0),0),plZ=new THREE.Plane(new THREE.Vector3(0,0,1),0),hitV=new THREE.Vector3();
@@ -1764,15 +1900,15 @@ mini.addEventListener('pointerdown',e=>{if(!G||G.ctrl!==null)return;miniDrag=tru
 mini.addEventListener('pointermove',e=>{if(miniDrag)miniJump(e)});
 mini.addEventListener('pointerup',()=>miniDrag=false);
 function resetMiner(u){if(u&&u.type==='miner'){u.state=u.carry>0?'toBase':'toMine';u.mineX=0;u.mineT=0}}
-function takeControl(u){const prev=G.ctrl!==null?G.units.find(o=>o.id===G.ctrl):null;resetMiner(prev);G.ctrl=u.id;hoverU=null;u.atkT=-1;u.charge=0;resetMiner(u);
-  toast(coarse?(u.type==='miner'?'Minero: pulsa ⚔ junto a una mina y lleva el oro a tu estatua':u.type==='spear'?'Lancero: toca el campo para lanzar · mantén 🛡 para bloquear':`Controlas a un ${TYPES[u.type].n}: ◀ ▶ mover, ⚔ o toca el campo para atacar`)
-    :(u.type==='miner'?'Minero: pica junto a una mina (Espacio) y lleva el oro a tu estatua':u.type==='spear'?'Lancero: clic lanza la lanza hacia el cursor · mantén S para bloquear':`Controlas a un ${TYPES[u.type].n}: A/D mover, W saltar, Shift esquivar`))}
+function takeControl(u){inp.jump=inp.dash=inp.special=false;const prev=G.ctrl!==null?G.units.find(o=>o.id===G.ctrl):null;resetMiner(prev);G.ctrl=u.id;hoverU=null;u.atkT=-1;u.charge=0;resetMiner(u);
+  toast(coarse?(u.type==='miner'?'Minero: pulsa ⚔ junto a una mina y lleva el oro a tu estatua':u.type==='spear'?'Lancero: ⚔ ataca · 🎯 lanza la lanza · mantén 🛡 para bloquear':`Controlas a un ${TYPES[u.type].n}: ◀ ▶ mover, ⚔ o toca el campo para atacar`)
+    :(u.type==='miner'?'Minero: pica junto a una mina (Espacio) y lleva el oro a tu estatua':u.type==='spear'?'Lancero: Espacio ataca · F lanza la lanza al cursor · mantén Q para bloquear':(u.type==='mage'?'Mago: Espacio lanza fuego que aturde · F invoca esbirros':u.type==='sword'?'Espadachín: WASD mover · Espacio ataca · mantén Q para bloquear':`Controlas a un ${TYPES[u.type].n}: WASD mover, J saltar, Shift esquivar`)))}
 function releaseControl(){if(G.ctrl!==null){const u=G.units.find(o=>o.id===G.ctrl);if(u){u.charge=0;u.block=false;resetMiner(u)}G.ctrl=null}inp.block=false}
 document.querySelectorAll('#pad [data-k]').forEach(b=>{const kx=b.dataset.k;
   b.addEventListener('pointerdown',e=>{e.preventDefault();inp[kx]=true;if(kx==='atk')inp.aimActive=false});
-  for(const ev of ['pointerup','pointerleave','pointercancel'])b.addEventListener(ev,()=>{if(kx!=='jump'&&kx!=='dash')inp[kx]=false})});
+  for(const ev of ['pointerup','pointerleave','pointercancel'])b.addEventListener(ev,()=>{if(kx!=='jump'&&kx!=='dash'&&kx!=='special')inp[kx]=false})});
 $('#padRelease').addEventListener('click',releaseControl);
-const KEYMAP={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right'};
+const KEYMAP={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down'};
 window.addEventListener('keydown',e=>{
   if(!G)return;
   if(KEYMAP[e.code]){inp[KEYMAP[e.code]]=true;e.preventDefault();return}
@@ -1781,23 +1917,22 @@ window.addEventListener('keydown',e=>{
   if(e.code==='KeyM'){toggleMute();return}
   if(e.code==='KeyV'){cycleCam();return}
   if(paused||G.over)return;
-  if(e.code==='KeyW'||e.code==='ArrowUp'){inp.jump=true;e.preventDefault()}
+  if(e.code==='KeyJ'){inp.jump=true;e.preventDefault()}
   else if(e.code==='ShiftLeft'||e.code==='ShiftRight')inp.dash=true;
-  else if(e.code==='KeyS'||e.code==='ArrowDown'){inp.block=true;e.preventDefault()}
+  else if(e.code==='KeyF'){inp.special=true;e.preventDefault()}
   else if(e.code==='Space'){inp.atk=true;inp.aimActive=false;e.preventDefault()}
   else if(e.code.startsWith('Digit')){const n=+e.code.slice(5);if(n>=1&&n<=6)playerTrain(ORDER[n-1])}
   else if(e.code==='KeyZ')setCommand(0,0);else if(e.code==='KeyX')setCommand(0,1);else if(e.code==='KeyC')setCommand(0,2);
-  else if(e.code==='KeyQ')tryAbility('rain',true);else if(e.code==='KeyE')tryAbility('rage',true);else if(e.code==='KeyR')tryAbility('meteor',true);
+  else if(e.code==='KeyQ'){if(G.ctrl!==null)inp.block=true;else tryAbility('rain',true)}else if(e.code==='KeyE')tryAbility('rage',true);else if(e.code==='KeyR')tryAbility('meteor',true);
   else if(e.code==='Escape'){if(aiming)aiming=null;else releaseControl()}
   else if(e.code==='Tab'){e.preventDefault();const own=G.units.filter(u=>u.team===0&&!u.hidden&&u.type!=='miner');if(own.length){own.sort((a,b)=>b.x-a.x);const i=own.findIndex(u=>u.id===G.ctrl);takeControl(own[(i+1)%own.length])}}
 });
 window.addEventListener('keyup',e=>{
   if(KEYMAP[e.code])inp[KEYMAP[e.code]]=false;
   if(e.code==='Space')inp.atk=false;
-  if(e.code==='KeyS'||e.code==='ArrowDown')inp.block=false;
-  if(e.code==='KeyW'||e.code==='ArrowUp')inp.jump=false;
+  if(e.code==='KeyQ')inp.block=false;
 });
-window.addEventListener('blur',()=>{inp.left=inp.right=inp.atk=inp.block=false});
+window.addEventListener('blur',()=>{inp.left=inp.right=inp.up=inp.down=inp.atk=inp.block=false});
 
 // ───────────────────────── screens ─────────────────────────
 document.querySelectorAll('#diffSeg button').forEach(b=>b.addEventListener('click',()=>{diffSel=b.dataset.d;document.querySelectorAll('#diffSeg button').forEach(o=>o.classList.toggle('on',o===b))}));
@@ -1810,7 +1945,7 @@ function beginBattle(o){
   for(const kx of ORDER)cards[kx].b.hidden=!G.avail[0].includes(kx);
   document.querySelectorAll('#abils .cmd').forEach(b=>b.hidden=!G.abils[0].includes(b.dataset.a));
   $('#abils').hidden=!G.abils[0].length;refreshCards();camZoom=1;camYaw=camPitch=0;
-  if(o.kind==='campaign'){const L=LEVELS[o.level];toast(`${o.level+1}. ${L.n} · ${L.survive?'Resiste 4 minutos':'Derriba la estatua del Caos'}`)}
+  if(o.kind==='campaign'){const L=LEVELS[o.level];toast(`${o.level+1}. ${L.n} · ${L.survive?'Resiste 4 minutos':L.boss?'Derriba el trono del Caos':'Derriba el monumento de '+L.n}`)}
   else toast(`Dificultad ${DIFFS[diffSel].name}. ¡Defiende la estatua!`);
 }
 function startGame(){beginBattle({kind:'skirmish',diff:diffSel})}
@@ -1840,7 +1975,7 @@ function renderCamp(){
     if(L.boss)chips.push('<span class="tagc warn">Jefe: Rey Gigante</span>');
     chips.push(`<span class="tagc">Estatua enemiga ${L.enemy.statue}</span>`);
     if(L.goldBonus)chips.push(`<span class="tagc">+${L.goldBonus} oro inicial</span>`);
-    const et=clamp(Math.floor((selLevel-1)/2),0,3);if(et)chips.push(`<span class="tagc warn">Forja enemiga nivel ${et}</span>`);
+    const et=L.forge;if(et)chips.push(`<span class="tagc warn">Forja enemiga nivel ${et}</span>`);
     const got=SAVE.stars[selLevel];
     $('#lvDetail').innerHTML=`<div><h2>${selLevel+1}. ${L.n}</h2><p>${L.desc}</p><div class="chips">${chips.join('')}</div>
       <ul class="goals"><li>★ Gana la batalla</li><li>★ Termina con tu estatua por encima del 50%</li><li>★ ${L.survive?'Termina con tu estatua por encima del 80%':'Gana en menos de '+fmt(L.par)}</li></ul></div>
@@ -1886,7 +2021,9 @@ $('#btnPlay').addEventListener('click',startGame);
 $('#btnAgain').addEventListener('click',()=>G.kind==='campaign'?beginBattle({kind:'campaign',level:G.level}):startGame());
 $('#btnNext').addEventListener('click',()=>{const win=G.winner===0,i=G.level;openCamp();if(win)selLevel=Math.min(i+1,SAVE.unlocked-1);else setTab('shop');renderCamp()});
 $('#btnMenu').addEventListener('click',toMenu);$('#btnQuit').addEventListener('click',()=>G.kind==='campaign'?openCamp():toMenu());
-$('#btnResume').addEventListener('click',togglePause);$('#btnPause').addEventListener('click',togglePause);$('#btnMute').addEventListener('click',()=>{initAudio();toggleMute()});
+$('#btnResume').addEventListener('click',togglePause);
+function setGore(v){GORE=v;try{localStorage.setItem('gdv-gore',v?'1':'0')}catch(e){}document.querySelectorAll('.goreBtn').forEach(b=>{b.textContent='Sangre: '+(v?'Sí':'No');b.setAttribute('aria-pressed',String(v))})}
+document.querySelectorAll('.goreBtn').forEach(b=>b.addEventListener('click',()=>setGore(!GORE)));setGore(GORE);$('#btnPause').addEventListener('click',togglePause);$('#btnMute').addEventListener('click',()=>{initAudio();toggleMute()});
 
 // ───────────────────────── loop ─────────────────────────
 let last=performance.now();
