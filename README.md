@@ -15,6 +15,15 @@ Inspirado en el original: palitos de extremidades gruesas y redondeadas con cabe
 - **Mago:** sombrero puntiagudo doblado, barba gris larga y bastón.
 - **Gigante:** encorvado, con hombros enormes, cabeza pequeña y garrote con púas.
 
+## Animaciones
+
+- **Espadachín:** corre inclinado con la espada atrás, se agacha en guardia al pelear y encadena tres tajos distintos (de arriba, lateral y ascendente).
+- **Minero:** va encorvado bajo el saco con el pico al hombro, y pica con golpes de dos manos hacia el suelo.
+- **Arquero:** se afirma con las piernas abiertas, tensa hasta la mejilla y el brazo sigue hacia atrás al soltar.
+- **Mago:** mueve el bastón al caminar; al cargar se estira y abre el otro brazo, y al lanzar se inclina hacia adelante.
+- **Gigante:** camina pesado arrastrando el garrote y golpea el suelo con las dos manos.
+- **Lancero:** guardia de hoplita con estocadas por encima del escudo y lanzamiento de jabalina.
+
 ## 3D
 
 - Terreno con relieve, bosques, montañas con niebla atmosférica, nubes y cielo con sol, luna y estrellas.

@@ -677,7 +677,7 @@ function nearestEnemy(u){
   return best?{t:best,d:bd}:null;
 }
 function startAttack(u,tg){
-  u.atkKind=null;u.block=false;const T=ws(u);u.atkT=0;u.hit=false;u.cd=T.cd*(G.teams[u.team].rage>0?.8:1)*(G.ctrl===u.id?.75:1);
+  u.atkKind=null;u.block=false;u.atkN=(u.atkN||0)+1;const T=ws(u);u.atkT=0;u.hit=false;u.cd=T.cd*(G.teams[u.team].rage>0?.8:1)*(G.ctrl===u.id?.75:1);
   if(tg){u.tgt=ref(tg);if(u.type==='archer'){const d=Math.abs(tg.x-u.x);u.aim=clamp(.05+d/1300,0,.5)}}
   if(!T.ranged)sfx('swing',u.x);
 }
@@ -999,7 +999,7 @@ function controlled(u,dt){
     }
     return;
   }
-  if(u.type==='sword'||u.type==='minion')u.block=!!inp.block&&!(u.atkT>=0);
+  if(u.type==='sword'||u.type==='minion'){u.block=!!inp.block&&!(u.atkT>=0);u.combatT=G.t}
   if(u.type==='mage'&&special){if(u.sumCd<=0)summonMinions(u);else if(u.team===0)toast(`Esbirros listos en ${Math.ceil(u.sumCd)} s`)}
   if(u.type==='spear'){
     u.combatT=G.t;u.block=!!inp.block&&!(u.atkT>=0);
@@ -1106,26 +1106,49 @@ function swingPose(p,w,b1,b2,bl){
   if(p<end){const e=inQ((p-wind)/(end-wind));return [lerp(-2.5,1.3,e),lerp(-.25,.15,e),lerp(-.14,.34,e),e*7,e]}
   const e=ease((p-end)/(1-end));return [lerp(1.3,b1,e),lerp(.15,b2,e),lerp(.34,bl,e),(1-e)*7,0];
 }
+// Melee swing styles: [upper arm, forearm, lean, hip drop] at wind-up and at strike end
+const SLASH=[
+  {w:[-2.5,-.25,-.14,0],s:[1.3,.15,.34,0],st:7},   // 0 overhead chop
+  {w:[-1.7,.15,-.12,1],s:[1.75,.05,.32,2],st:8},   // 1 horizontal slash
+  {w:[-.55,0,.22,3],s:[2.7,.1,-.06,-1],st:6},      // 2 rising slash
+  {w:[-2.8,-.3,-.2,0],s:[1.1,.1,.5,3],st:5},     // 3 pickaxe blow
+  {w:[-2.95,-.1,-.08,-1],s:[1.05,.12,.72,6],st:10},// 4 giant ground slam
+];
+function slashPose(p,w,kind,b1,b2,bl){
+  const K=SLASH[kind],wind=w*.7,end=Math.min(.98,w+.1);
+  if(p<wind){const e=ease(p/wind);return [lerp(b1,K.w[0],e),lerp(b2,K.w[1],e),lerp(bl,K.w[2],e),0,0,K.w[3]*e]}
+  if(p<end){const e=inQ((p-wind)/(end-wind));return [lerp(K.w[0],K.s[0],e),lerp(K.w[1],K.s[1],e),lerp(K.w[2],K.s[2],e),e*K.st,e,lerp(K.w[3],K.s[3],e)]}
+  const e=ease((p-end)/(1-end));return [lerp(K.s[0],b1,e),lerp(K.s[1],b2,e),lerp(K.s[2],bl,e),(1-e)*K.st,0,K.s[3]*(1-e)];
+}
 function pose(u){
   const T=ws(u),t=G?G.t:0,ph=u.phase,mv=u.moving,air=u.y>.5;
   const run=mv&&(u.dash>0||u.atkKind==='throw'||(G&&G.teams[u.team].rage>0));
   let lean=mv?(run?.28:.13):.03;
   let hipY=mv?-29-(1-Math.abs(Math.sin(ph)))*2.2:-28.6+Math.sin(t*2.2+u.id)*.6;
   const stride=run?12:9,lift=run?8:6;
-  let step=0,fa1,fa2,ba1,ba2,wAng,bh=null,draw=0,glow=0,strike=0,fh=null;
+  let step=0,fa1,fa2,ba1,ba2,wAng,bh=null,draw=0,glow=0,strike=0,fh=null,wOv=null,rel=0;
   if(mv){fa1=-Math.sin(ph)*.75+.15;ba1=Math.sin(ph)*.75+.15;fa2=ba2=.75}
   else{fa1=.22+Math.sin(t*2+u.id)*.05;fa2=.55;ba1=-.12;ba2=.5}
   const p=u.atkT>=0?u.atkT/T.atk:-1;
   switch(u.type){
     case 'sword':case 'miner':case 'giant':case 'boss':case 'minion':{
+      const sw=u.type==='sword'||u.type==='minion',gi=GI(u),mi=u.type==='miner';
       let q=p;
-      if(u.type==='miner'&&u.state==='mining'&&!mv&&q<0&&G&&G.ctrl!==u.id)q=(u.mineT*1.25)%1;
-      if(GI(u)){fa2+=.2}
-      if(q>=0){const r=swingPose(q,u.type==='miner'&&p<0?.5:T.hitAt,fa1,fa2,lean);fa1=r[0];fa2=r[1];lean=r[2];step=r[3];strike=r[4]}
-      wAng=fa1+fa2+(u.type==='sword'||u.type==='minion'?.12:.08);
-      if(u.block&&q<0&&(u.type==='sword'||u.type==='minion')){fa1=.95;fa2=1.25;wAng=2.55;lean=.12}
-      if(GI(u))bh='two';
-      if(u.type==='miner'&&u.carry>0&&q<0){fa1=mv?fa1:.3}
+      if(mi&&u.state==='mining'&&!mv&&q<0&&G&&G.ctrl!==u.id)q=(u.mineT*1.25)%1;
+      const fight=G&&G.t-(u.combatT??-9)<1.5;
+      // locomotion and stance
+      if(sw&&mv){lean=.38;fa1=-1.2+Math.sin(ph)*.2;fa2=.4;ba1=Math.sin(ph)*1.1+.3;ba2=1.2}               // sprint, sword trailing
+      else if(sw&&fight){fa1=.95;fa2=.75;lean=.14;hipY+=2.2;ba1=.5;ba2=1}                                // crouched guard
+      if(mi&&q<0&&u.carry>0){lean=mv?.42:.3;hipY+=1.5;fa1=.95;fa2=-.35;wOv=-2.45;ba1=-2.7;ba2=.8}       // bent under the sack, pick on the shoulder
+      if(gi){fa2+=.2;if(mv){hipY+=Math.abs(Math.sin(ph))*2.2;lean+=Math.sin(ph*2)*.05;fa1=-.45+Math.sin(ph)*.12;fa2=.15;wOv=-.72}} // lumbering, club dragging
+      if(q>=0){
+        const kind=gi?4:mi?3:u.type==='minion'?0:[0,1,2][(u.atkN||0)%3];
+        const r=slashPose(q,mi&&p<0?.5:T.hitAt,kind,fa1,fa2,lean);fa1=r[0];fa2=r[1];lean=r[2];step=r[3];strike=r[4];hipY+=r[5];wOv=null;
+        if(mi)bh='two';
+      }
+      wAng=wOv??fa1+fa2+(sw?.12:.08);
+      if(u.block&&q<0&&sw){fa1=.95;fa2=1.25;wAng=2.55;lean=.12}
+      if(gi&&wOv===null)bh='two';
       break;}
     case 'spear':{
       ba1=1.15;ba2=.35;
@@ -1155,14 +1178,16 @@ function pose(u){
       break;}
     case 'archer':{
       const aiming=p>=0||u.charge>0;
-      if(aiming){const aim=Math.PI/2+(u.aim||.2);fa1=aim;fa2=0;wAng=aim;draw=u.charge>0?u.charge:(p<T.hitAt?ease(p/T.hitAt):0);lean=.03-(u.aim||0)*.1;bh='draw'}
-      else{fa1=mv?fa1:.3;fa2=.15;wAng=fa1+fa2}
+      if(aiming){const aim=Math.PI/2+(u.aim||.2);fa1=aim;fa2=0;wAng=aim;draw=u.charge>0?u.charge:(p<T.hitAt?ease(p/T.hitAt):0);lean=-.04-(u.aim||0)*.12;bh='draw';hipY+=1.8;step=6;
+        if(u.charge<=0&&p>=T.hitAt){rel=(p-T.hitAt)/(1-T.hitAt);fa1=aim+rel*.25*(1-rel)}}
+      else{fa1=mv?fa1*.6+.25:.3;fa2=.15;wAng=fa1+fa2+(mv?.2:0)}
       break;}
     case 'mage':{
       fa1=.55;fa2=.55;wAng=Math.PI-.05;
+      if(mv){fa1=.6+Math.sin(ph)*.22;wAng=Math.PI-.05+Math.sin(ph)*.16;lean=.1}
       if(p>=0){const w=T.hitAt;
-        if(p<w){const e=ease(p/w);fa1=lerp(.55,-2.75,e);fa2=lerp(.55,.1,e);glow=e;lean=lerp(.03,-.1,e)}
-        else if(p<w+.12){const e=outQ((p-w)/.12);fa1=lerp(-2.75,1.35,e);fa2=lerp(.1,.05,e);wAng=lerp(Math.PI,2.05,e);lean=lerp(-.1,.25,e);glow=1-e;step=e*6}
+        if(p<w){const e=ease(p/w);fa1=lerp(.55,-2.75,e);fa2=lerp(.55,.1,e);glow=e;lean=lerp(.03,-.12,e);ba1=lerp(-.12,-2.1,e);ba2=lerp(.5,.3,e);hipY-=2.5*e}
+        else if(p<w+.12){const e=outQ((p-w)/.12);fa1=lerp(-2.75,1.35,e);fa2=lerp(.1,.05,e);wAng=lerp(Math.PI,2.05,e);lean=lerp(-.12,.28,e);glow=1-e;step=e*7;ba1=lerp(-2.1,-.6,e);hipY-=2.5*(1-e)}
         else{const e=ease((p-w-.12)/(1-w-.12));fa1=lerp(1.35,.55,e);fa2=lerp(.05,.55,e);wAng=lerp(2.05,Math.PI-.05,e);lean=lerp(.25,.03,e);step=(1-e)*6}}
       break;}
   }
@@ -1177,7 +1202,8 @@ function pose(u){
   let e1,h1;
   if(bh){
     const wv=[Math.sin(wAng),Math.cos(wAng)];
-    const tgt=bh==='two'?[h0[0]-wv[0]*6,h0[1]-wv[1]*6]:[h0[0]-wv[0]*(3+19*draw),h0[1]-wv[1]*(3+19*draw)];
+    let tgt=bh==='two'?[h0[0]-wv[0]*6,h0[1]-wv[1]*6]:[h0[0]-wv[0]*(3+19*draw),h0[1]-wv[1]*(3+19*draw)];
+    if(bh==='draw'&&rel>0){const kk=rel<.35?1:1-(rel-.35)/.65;tgt=[h0[0]-wv[0]*(3+24*kk)-2*kk,h0[1]-wv[1]*(3+24*kk)+3*kk]}
     const r=ik(sh[0],sh[1],tgt[0],tgt[1],12,12,-1);e1=r.j;h1=r.e;
   }else{e1=[sh[0]+Math.sin(ba1)*12,sh[1]+Math.cos(ba1)*12];h1=[e1[0]+Math.sin(ba1+ba2)*12,e1[1]+Math.cos(ba1+ba2)*12]}
   const feet=[];
