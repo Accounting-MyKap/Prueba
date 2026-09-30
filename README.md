@@ -107,7 +107,7 @@ Como en el original, el mundo está dividido en naciones y cada una se especiali
 | 5 | Fortaleza Roja | Asedio: monumento con 7000 de vida; +600 de oro inicial | — |
 | 6 | Colinas de Hielo | Gigantes | Gigantes (Meteoro desde esta batalla) |
 | 7 | Tierra de Nadie | Supervivencia: aguanta 4 minutos contra una horda | — |
-| 8 | Trono del Caos | Jefe final: el Rey Gigante aparece al minuto | — |
+| 8 | Trono del Caos | Jefe final: el Rey Gigante aparece al minuto y medio | — |
 
 El enemigo también mejora su forja: nivel 1 en las batallas 5 y 6, nivel 2 en la 7 y nivel 3 en la final.
 

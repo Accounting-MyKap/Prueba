@@ -396,7 +396,7 @@ const TYPES={
   mage  :{n:'Mago',      cost:600, hp:120, spd:48,dmg:40,range:290,cd:3.4,atk:1.0,hitAt:.6, build:7,  pop:2,size:1,ranged:true,aoe:64},
   giant :{n:'Gigante',   cost:1400,hp:1700,spd:32,dmg:78,range:46, cd:2.5,atk:1.1,hitAt:.58,build:12, pop:4,size:2.1,aoe:62},
   minion:{n:'Esbirro',    cost:0,   hp:55,  spd:88,dmg:8, range:20, cd:.8, atk:.45,hitAt:.45,build:99, pop:0,size:.82},
-  boss  :{n:'Rey Gigante',cost:3000,hp:7500,spd:24,dmg:130,range:58,cd:2.3,atk:1.2,hitAt:.58,build:99, pop:0,size:2.8,aoe:90},
+  boss  :{n:'Rey Gigante',cost:3000,hp:5200,spd:24,dmg:100,range:58,cd:2.3,atk:1.2,hitAt:.58,build:99, pop:0,size:2.8,aoe:90},
 };
 const GI=u=>u.type==='giant'||u.type==='boss';
 // Spearmen: throw the spear (javelin), then fight with a short sword (xiphos) behind the shield
@@ -431,9 +431,9 @@ const LEVELS=[
   {n:'Tierra de Nadie',forge:2,faction:'chaos',where:'Última muralla',desc:'Una horda sin fin. Mantén tu estatua en pie durante 4 minutos. La estatua enemiga no se puede dañar.',
    units:['miner','sword','archer','spear','mage','giant'],abil:ALL_ABIL,par:0,reward:300,survive:240,goldBonus:300,
    enemy:{units:['sword','archer','spear','mage','giant'],inc:1.25,bonus:3.5,think:.8,abil:true,push:25,statue:5000,start:[['miner',4],['sword',2]]}},
-  {n:'Trono del Caos',forge:3,faction:'chaos',where:'Ciudadela del Caos',desc:'El Rey Gigante despierta al minuto de batalla. Derriba la estatua del Caos para acabar la guerra.',
+  {n:'Trono del Caos',forge:3,faction:'chaos',where:'Ciudadela del Caos',desc:'El Rey Gigante despierta al minuto y medio de batalla. Derriba la estatua del Caos para acabar la guerra.',
    units:['miner','sword','archer','spear','mage','giant'],abil:ALL_ABIL,par:600,reward:360,boss:true,
-   enemy:{units:['sword','archer','spear','mage','giant'],inc:1.2,bonus:2.2,think:.8,abil:true,push:200,statue:5500,start:[['miner',4],['sword',2],['spear',1]]}},
+   enemy:{units:['sword','archer','spear','mage','giant'],inc:1.15,bonus:1.7,think:.85,abil:true,push:220,statue:5500,start:[['miner',4],['sword',2],['spear',1]]}},
 ];
 // Armory upgrades, bought with crowns between battles; req = campaign level (1-based) that must be unlocked
 const UPG=[
@@ -507,7 +507,7 @@ function newGame(o){
     const e=L.enemy;
     G.avail=[L.units.slice(),e.units.slice()];G.abils=[L.abil.slice(),e.abil?ALL_ABIL.slice():[]];
     G.cfg=[{...aiCfg(DIFFS.normal,L.units),bonus:0},{inc:e.inc,bonus:e.bonus,think:e.think,abil:e.abil,units:e.units,push:e.push,miners:7,focus:e.focus}];
-    G.night=!!L.night;G.survive=L.survive||0;G.bossAt=L.boss?60:0;
+    G.night=!!L.night;G.survive=L.survive||0;G.bossAt=L.boss?90:0;
     if(G.night)G.day=.76;
   }else{
     G.avail=[ORDER.slice(),ORDER.slice()];G.abils=[ALL_ABIL.slice(),ALL_ABIL.slice()];
