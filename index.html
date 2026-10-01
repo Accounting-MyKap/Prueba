@@ -741,7 +741,7 @@ function nearestEnemy(u){
   return best?{t:best,d:bd}:null;
 }
 function startAttack(u,tg){
-  u.atkKind=null;u.block=false;u.atkN=(u.atkN||0)+1;const T=ws(u);u.atkT=0;u.hit=false;u.cd=T.cd*(G.teams[u.team].rage>0?.8:1)*(G.ctrl===u.id?.75:1);
+  u.atkKind=null;u.block=false;u.atkN=(u.atkN||0)+1;u.bash=u.type==='spear'&&u.ammo>0&&u.atkN%3===0&&!!tg&&tg.statue===undefined;const T=ws(u);u.atkT=0;u.hit=false;u.cd=T.cd*(G.teams[u.team].rage>0?.8:1)*(G.ctrl===u.id?.75:1);
   if(tg){u.tgt=ref(tg);if(u.type==='archer'){const d=Math.abs(tg.x-u.x);u.aim=clamp(.05+d/1300,0,.5)}}
   if(!T.ranged)sfx('swing',u.x);
 }
@@ -757,8 +757,9 @@ function tickAttack(u,dt){
   if(p>=1){u.atkT=-1;u.atkKind=null}
 }
 const spearMax=u=>tierOf(u)>=2?2:1;
-function summonMinions(u){
-  u.sumCd=15;const fwd=u.dir;
+function summonMinions(u){u.sumCd=15;u.sumAnim=.85;u.sumPending=true;u.atkT=-1}
+function doSummon(u){
+  const fwd=u.dir;dustRing(u.x+fwd*14,GROUND+u.z,10,1,u.z);G.shake=Math.max(G.shake,3);
   if(!G.zones)G.zones=[];
   for(let i=0;i<2;i++){const m=spawn(u.team,'minion',u.x+fwd*(22+i*10));G.zones.push({k:'portal',team:u.team,x:m.x,z:clamp(u.z+(i?9:-9),-20,20),r:16,t:0,life:.9});m.z=clamp(u.z+(i?9:-9),-20,20);m.life=24;m.dir=fwd;
     for(let j=0;j<10;j++)part({k:'smoke',z:m.z,x:m.x+rnd(-8,8),y:GROUND+m.z-rnd(0,40),vx:rnd(-20,20),vy:rnd(-40,-10),life:rnd(.5,.9),sz:rnd(6,10)});
@@ -798,6 +799,7 @@ function doHit(u){
     if(ctrl)aimX=inp.mx;
     else{const tg=getRef(u.tgt);if(!tg)return;aimX=tg.x;aimZ=tg.z||0;if(tg.moving)aimX+=tg.dir*TYPES[tg.type].spd*mortarTime(tg.x-tx)*.85}
     lobFire(u.team,tx,ty,aimX,aimZ,d,u.id,T.aoe*G.mods[u.team].aoe);
+    part({k:'flash',z:u.z,x:tx,y:ty,life:.25,sz:26});part({k:'ring',z:u.z,x:tx,y:ty,life:.3,sz:14,col:u.team?'#ff6a3a':'#71b9ea'});
     sfx('fire',u.x);return;
   }
   if(GI(u)){
@@ -825,7 +827,7 @@ function doHit(u){
     hits.sort((a,b)=>a[0]-b[0]);hits=hits.slice(0,u.type==='sword'?2:1).map(h=>h[1]);
     const e=1-u.team;if(!hits.length&&Math.abs(STATUE[e]-u.x)-44<reach&&G.teams[e].statue.hp>0)hits=[statueObj(e)];
   }else{const tg=getRef(u.tgt);if(tg&&Math.abs(tg.x-u.x)-radius(tg)<=reach&&(tg.statue!==undefined||Math.abs(tg.z-u.z)<=LANE+2))hits=[tg]}
-  for(const tg of hits){hurt(tg,d,u,{kb:u.type==='spear'?90:crit?140:40,up:crit?160:0,crit});sfx('hit',u.x)}
+  for(const tg of hits){if(u.bash){hurt(tg,d*.6,u,{kb:200,stun:.7});sparks(u.x+u.dir*14,GROUND+u.z-30,8,u.z);G.shake=Math.max(G.shake,2);sfx('clang',u.x);continue}hurt(tg,d,u,{kb:u.type==='spear'?90:crit?140:40,up:crit?160:0,crit});sfx('hit',u.x)}
 }
 function area(team,x,r,d,src,o){
   for(const u of G.units){if(u.team===team||u.dead||u.hidden)continue;const dd=Math.abs(u.x-x);if(dd<r+radius(u)){hurt(u,d*(1-.4*dd/(r+10)),src,{...o,fromX:x})}}
@@ -962,6 +964,7 @@ function updUnit(u,dt){
   if(u.vx){u.x+=u.vx*dt;u.vx*=Math.pow(.004,dt);if(Math.abs(u.vx)<3)u.vx=0}
   u.x=clamp(u.x,30,WORLD_W-30);
   if(u.stun>0){u.stun-=dt;u.moving=false;u.atkT=-1;u.block=false;u.charge=0;return}
+  if(u.sumAnim>0){u.sumAnim-=dt;u.moving=false;if(u.sumPending&&u.sumAnim<.42){u.sumPending=false;doSummon(u)}return}
   if(u.roar>0){u.roar-=dt;u.moving=false;if(Math.random()<dt*20)part({k:'ember',z:u.z,x:u.x+rnd(-8,8),y:GROUND+u.z-rnd(10,60)*T.size,vx:rnd(-20,20),vy:rnd(-80,-30),life:.5,sz:2.5,col:0xff3010});return}
   if(u.volley>0){u.volley-=dt;u.moving=false;
     if(!u.volleyShot&&u.volley<.35){u.volleyShot=true;const [hx,hy]=handWorld(u);for(let i=0;i<2;i++)G.proj.push({k:'arrow',vis:true,x:hx,y:hy,vx:u.dir*rnd(160,240),vy:-rnd(820,950),team:u.team,dmg:0,src:null,z:u.z,stuck:0,life:1.2});sfx('bow',u.x)}
@@ -1249,10 +1252,14 @@ function pose(u){
       }else{
         // hoplite fighting: crouched behind the shield, spear held overhand at head height, jabbing over the shield
         const guard=!mv||p>=0||u.block||(G&&G.t-(u.combatT??-9)<1.5);
-        fa1=.7;fa2=1.0;wAng=2.75;
+        fa1=.7;fa2=1.0;wAng=2.75+(mv?Math.sin(ph)*.06:0);if(mv){ba1=1.2+Math.sin(ph)*.06;hipY-=Math.abs(Math.sin(ph))*.8}
         if(guard){
           wAng=1.47;fh=[-2,-13];ba1=1.3;ba2=.2;hipY+=2.5;lean=mv?lean:.1;
-          if(p>=0){const w=T.hitAt;let e;
+          if(p>=0&&u.bash){const w=T.hitAt;let e;
+            if(p<w*.85){e=ease(p/(w*.85));ba1=lerp(1.3,.2,e);ba2=lerp(.2,2.6,e);lean=lerp(.1,-.14,e);fh=[-6,-12];step=-4*e}
+            else if(p<w+.08){e=outQ((p-w*.85)/(w*.15+.08));ba1=lerp(.2,1.66,e);ba2=lerp(2.6,0,e);lean=lerp(-.14,.45,e);step=lerp(-4,14,e);fh=[-9,-11];strike=0}
+            else{e=ease((p-w-.08)/(1-w-.08));ba1=lerp(1.62,1.3,e);ba2=lerp(0,.2,e);lean=lerp(.42,.1,e);step=(1-e)*13;fh=[-2,-13]}}
+          else if(p>=0){const w=T.hitAt;let e;
             if(p<w*.6){e=ease(p/(w*.6));fh=[lerp(-2,-8,e),lerp(-13,-12,e)];lean=lerp(.1,-.06,e);wAng=lerp(1.47,1.52,e)}
             else if(p<w+.05){e=outQ((p-w*.6)/(w*.4+.05));fh=[lerp(-8,21.5,e),lerp(-12,-9,e)];lean=lerp(-.06,.3,e);step=e*10;strike=e;wAng=lerp(1.52,1.5,e)}
             else{e=ease((p-w-.05)/(1-w-.05));fh=[lerp(21.5,-2,e),lerp(-9,-13,e)];lean=lerp(.3,.1,e);step=(1-e)*10;wAng=lerp(1.5,1.47,e)}}
@@ -1267,12 +1274,16 @@ function pose(u){
       else{fa1=mv?fa1*.6+.25:.3;fa2=.15;wAng=fa1+fa2+(mv?.2:0)}
       break;}
     case 'mage':{
-      fa1=.55;fa2=.55;wAng=Math.PI-.05;
-      if(mv){fa1=.6+Math.sin(ph)*.22;wAng=Math.PI-.05+Math.sin(ph)*.16;lean=.1}
-      if(p>=0){const w=T.hitAt;
-        if(p<w){const e=ease(p/w);fa1=lerp(.55,-2.75,e);fa2=lerp(.55,.1,e);glow=e;lean=lerp(.03,-.12,e);ba1=lerp(-.12,-2.1,e);ba2=lerp(.5,.3,e);hipY-=2.5*e}
-        else if(p<w+.12){const e=outQ((p-w)/.12);fa1=lerp(-2.75,1.35,e);fa2=lerp(.1,.05,e);wAng=lerp(Math.PI,2.05,e);lean=lerp(-.12,.28,e);glow=1-e;step=e*7;ba1=lerp(-2.1,-.6,e);hipY-=2.5*(1-e)}
-        else{const e=ease((p-w-.12)/(1-w-.12));fa1=lerp(1.35,.55,e);fa2=lerp(.05,.55,e);wAng=lerp(2.05,Math.PI-.05,e);lean=lerp(.25,.03,e);step=(1-e)*6}}
+      const breath=Math.sin(t*1.8+u.id);
+      fh=[9,9+breath*.6];wAng=Math.PI-.06;lean=.16;hipY+=1.2;ba1=.35;ba2=.6;
+      if(mv){fh=[11+Math.sin(ph)*3.5,7+Math.abs(Math.cos(ph))*1.5];wAng=Math.PI-.32+Math.sin(ph)*.3;lean=.26;hipY+=1.8;ba1=Math.sin(ph)*.5+.1}
+      if(u.sumAnim>0){const k2=(.85-u.sumAnim)/.85;bh='two';
+        if(k2<.5){const e=ease(k2/.5);fh=[lerp(9,2,e),lerp(9,-23,e)];wAng=Math.PI;lean=lerp(.16,-.14,e);hipY-=2*e;glow=e}
+        else{const e=outQ((k2-.5)/.2);fh=[lerp(2,13,e),lerp(-23,7,e)];wAng=Math.PI-.05;lean=lerp(-.14,.32,e);hipY+=3*e;step=6*e;glow=1-e}}
+      if(p>=0){const w=T.hitAt,rel=w+.12;bh='two';
+        if(p<w){const e=ease(p/w);fh=[lerp(9,1,e),lerp(9,-22,e)];wAng=lerp(Math.PI-.06,Math.PI+.55,e);glow=e;lean=lerp(.16,-.16,e);hipY-=3*e;step=-3*e}
+        else if(p<rel){const e=outQ((p-w)/(rel-w));fh=[lerp(1,21,e),lerp(-22,-7,e)];wAng=lerp(Math.PI+.55,1.85,e);lean=lerp(-.16,.34,e);glow=1-e;step=lerp(-3,9,e);hipY-=3*(1-e)}
+        else{const e=ease((p-rel)/(1-rel));fh=[lerp(21,9,e),lerp(-7,9,e)];wAng=lerp(1.85,Math.PI-.06,e);lean=lerp(.34,.16,e);step=(1-e)*9}}
       break;}
   }
   if(u.roar>0){const e=Math.sin(Math.min(1,(.7-u.roar)/.7)*Math.PI);fa1=lerp(fa1,-2.6,e);fa2=lerp(fa2,.3,e);ba1=lerp(ba1,-2.4,e);ba2=lerp(ba2,.2,e);lean=lerp(lean,-.22,e);hipY+=2*e;step=5*e;bh=null;fh=null;wAng=fa1+fa2+.1;if(u.type==='spear')wAng=Math.PI}
@@ -1546,6 +1557,7 @@ function unit3D(u,tier,main){
     if(tier>=2){seg('gocta',A(top,wv,-2),A(top,wv,7),2.4*k*(1+J.glow*.4),oc);ball('glow',A(top,wv,2.5),orr*.55,0xffffff)}
     else ball('glow',top,orr,oc);
     if(tier>=3)for(let i=0;i<3;i++){const a=t*2.6+i*2.094;ball('glow',[neck[0]+Math.cos(a)*10*k,neck[1]-6*k+Math.sin(a*1.3)*2*k,bz+Math.sin(a)*10*k],1.6*k,oc)}
+    if(main&&J.glow>.12&&Math.random()<.7){const a=rnd(0,6.28),rr=rnd(14,24)*k/SC;emit([top[0]+Math.cos(a)*rr*SC,top[1]+Math.sin(a)*rr*SC,top[2]],{k:'ember',vx:-Math.cos(a)*rr*3.2*d,vy:Math.sin(a)*rr*3.2,life:.3,sz:rnd(1.5,2.6),col:oc})}
     if(main){if(J.glow>.15||nightF>.3)LIGHTS.push({p:top,col:oc,i:.5+J.glow*2.2,d:16});if(J.glow>.3&&Math.random()<.4)emit(top,{k:'ember',vx:rnd(-20,20),vy:rnd(-40,-10),life:.4,sz:rnd(1.5,3),col:tm?0xff6a3a:0x71b9ea})}
     if(tier>=1)seg('wcone',A(hip,UPv,-14),A(neck,UPv,-3),8.5*k,tier>=3?0x3b2a5a:trim);
     if(tier>=3)put('band',hip[0],hip[1]-12*k,hip[2],QI,8.3*k,3*k,8.3*k,C.gold);

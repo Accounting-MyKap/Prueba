@@ -20,9 +20,9 @@ Inspirado en el original: palitos de extremidades gruesas y redondeadas con cabe
 - **Espadachín:** corre inclinado con la espada atrás, se agacha en guardia al pelear y encadena tres tajos distintos (de arriba, lateral y ascendente).
 - **Minero:** va encorvado bajo el saco con el pico al hombro, y pica con golpes de dos manos hacia el suelo.
 - **Arquero:** se afirma con las piernas abiertas, tensa hasta la mejilla y el brazo sigue hacia atrás al soltar.
-- **Mago:** mueve el bastón al caminar; al cargar se estira y abre el otro brazo, y al lanzar se inclina hacia adelante.
+- **Mago:** anciano encorvado que camina apoyándose en el bastón; para lanzar levanta el bastón con las dos manos sobre la cabeza mientras la energía gira hacia el orbe, y lo empuja hacia adelante con un destello. Para invocar esbirros alza el bastón y lo clava en el suelo.
 - **Gigante:** camina pesado arrastrando el garrote y golpea el suelo con las dos manos.
-- **Lancero:** guardia de hoplita con estocadas por encima del escudo y lanzamiento de jabalina.
+- **Lancero:** marcha con la lanza vertical y el escudo al frente; en combate, guardia de hoplita con estocadas por encima del escudo, y cada tercer ataque un escudazo que empuja y aturde al enemigo. También lanza la jabalina.
 
 ## 3D
 
