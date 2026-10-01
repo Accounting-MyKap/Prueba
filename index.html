@@ -1102,7 +1102,9 @@ function soldierAI(u,dt){
       if(!u.block)u.dir=Math.sign(dx)||u.dir;
       if(T.ranged&&d<40&&u.cd>.3&&tg.statue===undefined){moveTo(u,u.x-Math.sign(dx)*20,spd*.7,dt);u.dir=Math.sign(dx)||u.dir}
       else{u.moving=false;if(u.cd<=0&&!(u.blockT>0))startAttack(u,tg)}
-    }else moveTo(u,tg.x-Math.sign(dx)*(radius(tg)+reach*.85),mspd,dt);
+    }else if(moveTo(u,tg.x-Math.sign(dx)*(radius(tg)+reach*.6),mspd,dt)){
+      // arrived at the approach point but still a hair out of reach: step in and swing instead of idling
+      u.dir=Math.sign(dx)||u.dir;if(d<=reach+6&&!T.ranged){u.moving=false;if(u.cd<=0&&!(u.blockT>0))startAttack(u,tg)}else u.x+=u.dir*Math.min(mspd*dt,d-reach+1)}
   }else if(moveTo(u,gx,mspd,dt))u.dir=fwd;
 }
 // Direction (+1/-1) to raise the shield toward, or 0 when there is nothing worth blocking
