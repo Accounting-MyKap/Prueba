@@ -1040,6 +1040,9 @@ function minerAI(u,dt){
   const tm=G.teams[u.team],fwd=u.team?-1:1,home=STATUE[u.team],spd=TYPES.miner.spd*(tm.rage>0?1.3:1);
   if(G.command[u.team]===0){const gx=home+fwd*GARRISON_X;if(moveTo(u,gx,spd,dt)){u.hidden=true;u.hp=Math.min(u.max,u.hp+14*dt);garrisonShoot(u)}return}
   u.hidden=false;
+  // self-defence: a miner with an enemy right next to it swings its pick back
+  {let foe=null,fd=34;for(const o of G.units){if(o.team===u.team||o.dead||o.hidden)continue;const d=Math.abs(o.x-u.x)-radius(o);if(d<fd&&Math.abs(o.z-u.z)<=LANE+2){fd=d;foe=o}}
+   if(foe){u.moving=false;u.dir=Math.sign(foe.x-u.x)||u.dir;u.combatT=G.t;if(u.cd<=0)startAttack(u,foe);return}}
   if(u.carry>0||u.state==='toBase'){
     u.state='toBase';u.z=lerp(u.z,u.z0,Math.min(1,dt*1.5));
     if(moveTo(u,home+fwd*52,spd,dt))depositGold(u);
