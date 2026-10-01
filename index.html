@@ -236,7 +236,36 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
 @media (orientation:portrait) and (max-width:600px){
   #rotHint{display:block;position:absolute;left:10px;right:10px;bottom:96px;z-index:4;text-align:center;background:rgba(19,16,13,.85);border:1px solid var(--line);border-radius:5px;padding:4px 8px;font-size:13px;color:var(--muted);pointer-events:none}
 }
-.tag-short,.touch-help{display:none}
+.tag-short{display:none}
+.menu-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.menu-links button{flex:1 1 150px;font-size:16px}
+.info-panel{display:flex;flex-direction:column}
+.info-panel .camphead h1{font-size:clamp(34px,5vw,48px)}
+#infoBody{min-height:0}
+#infoBody h3{font-family:var(--f-display);font-weight:600;font-size:22px;color:var(--gold);margin:18px 0 8px}
+#infoBody h3:first-child{margin-top:0}
+.ctl{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ctl li{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:4px 14px;align-items:baseline;background:#1a1612;border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.ctl li>span:first-child{min-width:0;color:var(--text);font-size:15px;line-height:1.3}
+.ctl li>span:first-child small{display:block;color:var(--muted);font-size:13px}
+.ctl .key{text-align:right;font-size:14px;color:var(--muted);line-height:1.6}
+.ctl .key kbd{margin-left:2px}
+.ctl .tch{font-size:15px;font-weight:700;color:var(--text)}
+.dev-k .tch,.dev-t .kb{display:none}
+.ucards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.ucard{background:#1a1612;border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ucard header{display:flex;gap:10px;align-items:center}
+.ucard header img{width:64px;height:64px;flex:none;border-radius:6px;background:radial-gradient(circle at 50% 40%,#3a3126,#16120e)}
+.ucard header b{font-size:20px;display:block}
+.ucard header span{font-size:13px;color:var(--muted)}
+.ustats{display:flex;flex-wrap:wrap;gap:6px}
+.ustats i{font-style:normal;font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:10px;padding:1px 8px;color:var(--text)}
+.ucard p{margin:0;font-size:14px;color:var(--muted);line-height:1.35}
+.ucard .ctl li{padding:5px 8px;background:#211b15}
+.newsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.newsgrid div{background:#1a1612;border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:14px;color:var(--muted);line-height:1.35}
+.newsgrid b{display:block;color:var(--text);font-size:16px;margin-bottom:3px}
+@media (max-width:640px),(max-height:520px){.info-panel{padding:14px}.devseg button{padding:6px 10px;font-size:14px}.ucards{grid-template-columns:1fr}}
 .inmenu #deck,.inmenu #hud,.inmenu #rotHint,.inmenu #toast{display:none}
 .or-sk{color:var(--muted);font-size:16px;margin-left:8px}
 details.more{margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
@@ -251,8 +280,8 @@ details.more[open] summary{margin-bottom:10px}
   .menu-row #btnCamp{flex:1 1 100%;padding:14px;font-size:22px}
   .or-sk{flex:1 1 100%;margin:4px 0 0;font-size:14px}
   .menu-row .seg button{padding:9px 12px}
-  .touch-help{display:block;margin-bottom:12px}
-  #menuMore .cols .keys,#menuMore .cols>div:last-child{display:none}
+  .menu-links{margin-top:10px;padding-top:10px}
+  .menu-links button{flex:1 1 30%;padding:9px 6px;font-size:14px}
 }
 @media (prefers-reduced-motion:reduce){.card.shake{animation:none}#toast{transition:none}}
 </style>
@@ -317,51 +346,24 @@ details.more[open] summary{margin-bottom:10px}
           <button class="ghost" id="btnPlay">Escaramuza</button>
           <button class="ghost goreBtn" type="button" aria-pressed="true">Sangre: Sí</button>
         </div>
-        <details class="more" id="menuMore"><summary>Novedades y controles</summary>
-        <div class="touch-help">
-          <h2>Cómo se juega</h2>
-          <ul class="news">
-            <li><b>Toca las cartas de abajo</b> para entrenar unidades; los mineros traen el oro.</li>
-            <li><b>Defender / Atacar</b> mueve a todo tu ejército.</li>
-            <li><b>Toca un soldado</b> para controlarlo con el joystick y ⚔.</li>
-          </ul>
+        <div class="menu-links" role="group" aria-label="Información">
+          <button type="button" class="ghost" data-info="news">Novedades</button>
+          <button type="button" class="ghost" data-info="controls">Controles</button>
+          <button type="button" class="ghost" data-info="units">Unidades y habilidades</button>
         </div>
-        <div class="cols">
-          <div>
-            <h2>Novedades</h2>
-            <ul class="news">
-              <li><b>Conquista de naciones.</b> 8 batallas: cada nación vencida te da su unidad. Gana coronas para la Armería.</li>
-              <li><b>Guarnición y sangre.</b> Tus tropas disparan tras una empalizada de lanzas; las flechas se clavan y los caídos dejan charcos.</li>
-              <li><b>Mundo 3D.</b> Luces y sombras reales, ciclo día/noche y cuatro vistas de cámara.</li>
-              <li><b>Forja.</b> Cada mejora de unidad cambia su arma y armadura y aumenta su daño.</li>
-              <li><b>Animación esquelética.</b> Piernas con IK, golpes con estela, muertes con física ragdoll.</li>
-              <li><b>Veteranía.</b> Cada baja da experiencia; con 3 rangos una unidad gana +36% vida y daño.</li>
-              <li><b>Lanceros como en <i>300</i>.</b> Lanzan su lanza, siguen con espada corta y bloquean con el escudo.</li>
-              <li><b>Poderes.</b> Lluvia de flechas, Furia y Meteoro, pagados con maná; solo donde tus tropas ven.</li>
-              <li><b>Control directo mejorado.</b> Salto, esquiva con invulnerabilidad, críticos y tiro con carga.</li>
-              <li><b>Guarnición.</b> Tus tropas se curan dentro de la estatua y los arqueros disparan desde ella.</li>
-            </ul>
-          </div>
-          <div>
-            <h2>Controles</h2>
-            <dl class="keys">
-              <dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Entrenar unidades</dd>
-              <dt><kbd>Z</kbd> <kbd>X</kbd> <kbd>C</kbd></dt><dd>Guarnición · Defender · Atacar</dd>
-              <dt><kbd>Q</kbd> <kbd>E</kbd> <kbd>R</kbd></dt><dd>Poderes (apuntan al cursor)</dd>
-              <dt>Clic en soldado</dt><dd>Controlarlo (<kbd>Tab</kbd> elige el del frente)</dd>
-              <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Mover la unidad (también arriba y abajo del campo) o la cámara</dd>
-              <dt><kbd>Espacio</kbd> / clic</dt><dd>Atacar · minar (mantén para cargar el arco)</dd>
-              <dt><kbd>Q</kbd></dt><dd>Bloquear (espadachín y lancero, al controlarlos)</dd>
-              <dt><kbd>F</kbd></dt><dd>Lanzar la lanza · invocar esbirros (mago)</dd>
-              <dt><kbd>J</kbd> · <kbd>Shift</kbd></dt><dd>Saltar · Esquivar</dd>
-              <dt>Arrastrar</dt><dd>Mover la cámara</dd>
-              <dt>Rueda · clic derecho</dt><dd>Zoom · girar la cámara (en el móvil, pellizca)</dd>
-              <dt><kbd>V</kbd></dt><dd>Cambiar vista</dd>
-            </dl>
-          </div>
-        </div>
-        </details>
         <p class="hint">Detrás se juega una batalla de demostración.</p>
+      </div>
+    </div>
+
+    <div class="overlay" id="info" hidden>
+      <div class="panel wide info-panel">
+        <div class="camphead">
+          <h1>Guía</h1>
+          <div class="tabs" role="tablist" id="infoTabs"><button data-t="news" role="tab">Novedades</button><button data-t="controls" role="tab">Controles</button><button data-t="units" role="tab">Unidades</button></div>
+          <div class="seg devseg" id="devSeg" role="group" aria-label="Tipo de control"><button data-dev="k">Teclado</button><button data-dev="t">Táctil</button></div>
+          <button class="ghost" id="infoBack">Volver</button>
+        </div>
+        <div id="infoBody"></div>
       </div>
     </div>
 
@@ -2138,7 +2140,60 @@ document.querySelectorAll('.acts [data-k]').forEach(b=>{b.addEventListener('poin
 let followMode=false;
 $('#btnFollow').addEventListener('click',()=>{followMode=!followMode;$('#btnFollow').setAttribute('aria-pressed',String(followMode));$('#btnFollow').style.color=followMode?'var(--gold)':'';toast(followMode?'La cámara sigue a tu primera línea':'Cámara libre')});
 $('#btnFull').addEventListener('click',async()=>{try{if(!document.fullscreenElement){await document.documentElement.requestFullscreen({navigationUI:'hide'});try{await screen.orientation.lock('landscape')}catch(e){}}else await document.exitFullscreen()}catch(e){toast('Tu navegador no permite pantalla completa aquí')}});
-if(!coarse&&innerWidth>640&&innerHeight>520)$('#menuMore').open=true;
+// ── guide: news, controls and units, with keyboard or touch controls
+const K=(...k)=>k.map(x=>`<kbd>${x}</kbd>`).join(' ');
+const C2=(label,kb,tch,note)=>`<li><span>${label}${note?`<small>${note}</small>`:''}</span><span class="key"><span class="kb">${kb}</span><span class="tch">${tch}</span></span></li>`;
+const NEWS=[['Conquista de naciones','8 batallas: cada nación vencida te da su unidad. Gana coronas para la Armería.'],['Forja','Cada mejora de unidad cambia su arma y armadura y aumenta su daño.'],['Mundo 3D','Luces y sombras, ciclo día/noche y cuatro vistas de cámara.'],
+  ['Guarnición','Tus tropas se refugian tras una empalizada de lanzas y disparan desde ahí.'],['Sangre y muertes','Flechas que se clavan, decapitaciones, charcos y muertes distintas según el golpe.'],['Veteranía','Cada baja da experiencia; con 3 rangos una unidad gana +36% de vida y daño.'],
+  ['Lanceros de 300','Guardia de hoplita, escudazo, jabalina y espada corta.'],['Poderes','Lluvia de flechas, Furia y Meteoro, solo donde tus tropas ven.'],['Profundidad','Las unidades se mueven también hacia el fondo y el frente del campo.']];
+const UNITS_INFO=[
+ ['miner','Minero','Recolector','Extrae oro de las minas y lo lleva a la estatua. No pelea por su cuenta.',[
+   C2('Picar oro',K('Espacio')+' / clic','⚔','junto a una mina; cada golpe llena la bolsa'),C2('Entregar el oro','camina a la estatua','joystick','se suma solo al llegar'),C2('Golpear con el pico',K('Espacio'),'⚔','lejos de una mina')]],
+ ['sword','Espadachín','Cuerpo a cuerpo rápido','Barato y veloz. Encadena tres tajos distintos y a veces decapita. Forja 3: los golpes queman.',[
+   C2('Atacar',K('Espacio')+' / clic','⚔','20% de críticos al controlarlo'),C2('Bloquear',K('Q')+' (mantener)','🛡','recibe la mitad del daño de frente'),C2('Saltar',K('J'),'⤒'),C2('Esquivar',K('Shift'),'⇆','invulnerable un instante')]],
+ ['archer','Arquero','A distancia','Dispara flechas con arco largo. De noche pierde 20% de alcance. Forja 3: flechas de fuego.',[
+   C2('Apuntar','mueve el ratón','—','la trayectoria se dibuja mientras cargas'),C2('Cargar y disparar','mantén '+K('Espacio')+' / clic y suelta','⚔ (toque: tiro rápido)','más carga = más lejos'),C2('Saltar · esquivar',K('J')+' · '+K('Shift'),'⤒ · ⇆')]],
+ ['spear','Lancero','Tanque con escudo','Hoplita con armadura. Abre el combate lanzando su jabalina y luego pelea con estocadas sobre el escudo; sin lanza usa espada corta.',[
+   C2('Estocada',K('Espacio')+' / clic','⚔','cada tercer ataque es un escudazo que aturde'),C2('Lanzar jabalina',K('F'),'🎯','hacia el cursor si está delante, si no al enemigo más cercano'),C2('Recoger la lanza','pasa por encima','joystick','o vuelve a la estatua'),C2('Bloquear con el escudo',K('Q')+' (mantener)','🛡','30% del daño; las flechas casi nada')]],
+ ['mage','Mago','Magia en área','Lanza bolas de fuego en arco que explotan y aturden. Invoca esbirros que pelean 24 s.',[
+   C2('Bola de fuego',K('Espacio')+' / clic','⚔','cae donde apuntas; se ve el arco y el área'),C2('Invocar 2 esbirros',K('F'),'✦','15 s de recarga'),C2('Saltar · esquivar',K('J')+' · '+K('Shift'),'⤒ · ⇆')]],
+ ['giant','Gigante','Pesado','Enorme y lento. Su mazazo golpea en área y lanza a los enemigos por los aires.',[
+   C2('Mazazo',K('Espacio')+' / clic','⚔','daño en área'),C2('Saltar',K('J'),'⤒')]],
+];
+let infoTab='news',dev=coarse?'t':'k';
+function renderInfo(){
+  document.querySelectorAll('#infoTabs button').forEach(b=>{const on=b.dataset.t===infoTab;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+  document.querySelectorAll('#devSeg button').forEach(b=>b.classList.toggle('on',b.dataset.dev===dev));
+  $('#devSeg').hidden=infoTab==='news';
+  const body=$('#infoBody');body.className='dev-'+dev;
+  if(infoTab==='news')body.innerHTML='<div class="newsgrid">'+NEWS.map(([t,d])=>`<div><b>${t}</b>${d}</div>`).join('')+'</div>';
+  else if(infoTab==='controls')body.innerHTML=`<h3>Ejército</h3><ul class="ctl">
+    ${C2('Entrenar unidades',K('1')+'–'+K('6'),'cartas de abajo','cuestan oro y población')}
+    ${C2('Guarnición · Defender · Atacar',K('Z')+' '+K('X')+' '+K('C'),'botones de abajo','en guarnición se curan tras la empalizada y disparan')}
+    ${C2('Lluvia de flechas · Furia · Meteoro',K('Q')+' '+K('E')+' '+K('R'),'botones de poder','Flechas y Meteoro se apuntan donde tus tropas ven')}</ul>
+    <h3>Control directo</h3><ul class="ctl">
+    ${C2('Tomar el control de un soldado','clic en él · '+K('Tab'),'tócalo')}
+    ${C2('Moverlo (también al fondo y al frente)',K('W')+K('A')+K('S')+K('D'),'joystick')}
+    ${C2('Atacar',K('Espacio')+' / clic','⚔')}
+    ${C2('Bloquear · habilidad especial',K('Q')+' · '+K('F'),'🛡 · 🎯/✦','según la unidad')}
+    ${C2('Saltar · esquivar',K('J')+' · '+K('Shift'),'⤒ · ⇆')}
+    ${C2('Soltar el soldado',K('Esc'),'✕')}</ul>
+    <h3>Cámara y partida</h3><ul class="ctl">
+    ${C2('Mover la cámara',K('A')+' '+K('D')+' · arrastrar','arrastrar · minimapa')}
+    ${C2('Zoom · girar',`rueda · clic derecho`,'pellizcar')}
+    ${C2('Cambiar vista',K('V'),'📷')}
+    ${C2('Seguir al frente','—','botón de mira')}
+    ${C2('Pausa · sonido',K('P')+' · '+K('M'),'⏸ · 🔊')}</ul>`;
+  else body.innerHTML='<div class="ucards">'+UNITS_INFO.map(([ty,n,role,desc,ctl])=>{const T=TYPES[ty];
+    return `<div class="ucard"><header><img src="${thumb(ty,0)}" alt=""><div><b>${n}</b><span>${role}</span></div></header>
+      <div class="ustats"><i>${T.cost} oro</i><i>${T.hp} vida</i><i>${T.dmg} daño</i><i>${T.ranged?'alcance '+T.range:'cuerpo a cuerpo'}</i><i>${T.pop} pob.</i></div>
+      <p>${desc}</p><ul class="ctl">${ctl.join('')}</ul></div>`}).join('')+'</div>';
+}
+function openInfo(t){infoTab=t;$('#menu').hidden=true;$('#info').hidden=false;renderInfo();$('#info').scrollTop=0}
+document.querySelectorAll('.menu-links [data-info]').forEach(b=>b.addEventListener('click',()=>openInfo(b.dataset.info)));
+document.querySelectorAll('#infoTabs button').forEach(b=>b.addEventListener('click',()=>{infoTab=b.dataset.t;renderInfo()}));
+document.querySelectorAll('#devSeg button').forEach(b=>b.addEventListener('click',()=>{dev=b.dataset.dev;renderInfo()}));
+$('#infoBack').addEventListener('click',()=>{$('#info').hidden=true;$('#menu').hidden=false});
 let rotDismissed=false;$('#rotDismiss').addEventListener('click',()=>{rotDismissed=true;$('#rotOv').hidden=true});
 $('#aimCancel').addEventListener('click',()=>{aiming=null});
 const KEYMAP={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down'};
@@ -2171,7 +2226,7 @@ window.addEventListener('blur',()=>{inp.left=inp.right=inp.up=inp.down=inp.atk=i
 document.querySelectorAll('#diffSeg button').forEach(b=>b.addEventListener('click',()=>{diffSel=b.dataset.d;document.querySelectorAll('#diffSeg button').forEach(o=>o.classList.toggle('on',o===b))}));
 const CROWN='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 18l-1-11 6 5 4-8 4 8 6-5-1 11z"/><rect x="3" y="19" width="18" height="2.5" rx="1"/></svg>';
 document.querySelectorAll('.crown-i').forEach(e=>e.innerHTML=CROWN);
-const hideAll=()=>{for(const id of ['#menu','#camp','#endOv','#pauseOv'])$(id).hidden=true};
+const hideAll=()=>{for(const id of ['#menu','#camp','#endOv','#pauseOv','#info'])$(id).hidden=true};
 function beginBattle(o){
   initAudio();newGame(o);mode='play';paused=false;aiming=null;hideAll();
   document.querySelectorAll('#cmds .cmd').forEach(b=>b.classList.toggle('on',+b.dataset.c===1));

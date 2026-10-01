@@ -169,7 +169,7 @@ La **escaramuza** sigue disponible con todo desbloqueado, sin mejoras y con 3 di
 
 ## Controles
 
-Basados en la guía de control del original.
+Basados en la guía de control del original. En el menú, *Controles* y *Unidades y habilidades* los muestran por secciones, con un selector Teclado / Táctil, y la guía de unidades explica qué puede hacer cada una y cómo se controla.
 
 | Tecla | Acción |
 |---|---|
