@@ -230,6 +230,9 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
   #pad{bottom:max(8px,env(safe-area-inset-bottom,0px))}
   .icon-btn{width:34px;height:32px}
   #aimBar{top:48px;font-size:14px}
+  #forgePanel{left:8px;right:8px;bottom:calc(76px + env(safe-area-inset-bottom,0px));padding:8px}
+  .fp-head span{display:none}
+  .fp-item{flex-basis:132px}
   .ctrlmode #deck{display:none}
 }
 @media (max-height:360px){.stick{width:112px;height:112px}.acts{transform:scale(.86);transform-origin:right bottom}}
@@ -237,6 +240,25 @@ ol.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:
   #rotHint{display:block;position:absolute;left:10px;right:10px;bottom:96px;z-index:4;text-align:center;background:rgba(19,16,13,.85);border:1px solid var(--line);border-radius:5px;padding:4px 8px;font-size:13px;color:var(--muted);pointer-events:none}
 }
 .tag-short{display:none}
+#forgePanel{position:absolute;left:16px;right:16px;bottom:10px;z-index:7;background:rgba(19,16,13,.94);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;max-width:980px;margin:0 auto}
+.fp-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+.fp-head b{font-family:var(--f-display);font-size:22px;color:var(--gold)}
+.fp-head span{color:var(--muted);font-size:14px;flex:1;min-width:0}
+.fp-head button{background:none;border:1px solid var(--line);border-radius:5px;width:32px;height:30px;cursor:pointer}
+.fp-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.fp-item{flex:0 0 150px;background:#221c16;border:1px solid var(--line);border-radius:6px;padding:6px 8px 8px;display:flex;flex-direction:column;gap:4px;cursor:pointer;text-align:left;position:relative}
+.fp-item:hover:not(:disabled){border-color:var(--gold)}
+.fp-item:disabled{cursor:not-allowed;opacity:.55}
+.fp-item .fp-top{display:flex;gap:6px;align-items:center}
+.fp-item img{width:40px;height:40px;flex:none;border-radius:4px;background:radial-gradient(circle at 50% 40%,#3a3126,#16120e)}
+.fp-item b{font-size:15px;line-height:1.1}
+.fp-item small{font-size:12px;color:var(--muted);line-height:1.2}
+.fp-pips{display:flex;gap:3px}
+.fp-pips i{width:16px;height:5px;border-radius:3px;background:#3a3126}
+.fp-pips i.on{background:var(--gold)}
+.fp-cost{font-size:14px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.fp-bar{height:4px;background:#0c0b0a;border-radius:2px;overflow:hidden}
+.fp-bar i{display:block;height:100%;width:0;background:var(--ok)}
 .menu-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .menu-links button{flex:1 1 150px;font-size:16px}
 .info-panel{display:flex;flex-direction:column}
@@ -316,6 +338,10 @@ details.more[open] summary{margin-bottom:10px}
 
     <div id="toast"></div>
     <div id="rotHint">Gira el teléfono para ver más campo de batalla</div>
+    <div id="forgePanel" hidden>
+      <div class="fp-head"><b>Forja</b><span>Mejora tus tropas con oro durante la batalla</span><button type="button" id="forgeClose" aria-label="Cerrar">✕</button></div>
+      <div class="fp-list" id="forgeList"></div>
+    </div>
     <div id="aimBar" hidden><span>Toca una zona que tus tropas vean</span><button id="aimCancel" type="button">Cancelar</button></div>
     <div id="rotOv" hidden><div><svg viewBox="0 0 48 48" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="14" y="4" width="20" height="36" rx="3"/><path d="M40 30a16 16 0 0 1-16 14M36 44h-12v-0"/></svg><p>Gira el teléfono para jugar en horizontal</p><button id="rotDismiss" type="button" class="ghost">Seguir en vertical</button></div></div>
     <div id="ctrlTag" hidden>Controlando: <b id="ctrlName"></b> · <kbd>Esc</kbd> soltar</div>
@@ -415,6 +441,10 @@ details.more[open] summary{margin-bottom:10px}
 
   <div id="deck">
     <div class="group" id="units"></div>
+    <div class="group" id="forgeGrp" hidden>
+      <button class="cmd" id="btnForge" title="Forja (G): mejora armas y armaduras con oro">
+        <svg viewBox="0 0 26 26" fill="currentColor"><path d="M3 9h13l3-3h4v5h-4l-2 2v2h-3v5h4v3H8v-3h4v-5H9v-2L6 11H3z"/></svg><span>Forja</span><small>G</small></button>
+    </div>
     <div class="group" id="cmds">
       <button class="cmd" data-c="0" title="Guarnición (Z): las tropas se refugian y curan; arqueros y magos disparan desde la estatua">
         <svg viewBox="0 0 26 26" fill="currentColor"><path d="M4 23V9h3v3h3V9h3v3h3V9h3v3h3V9h-0 3v14h-8v-6a3 3 0 0 0-6 0v6z"/></svg><span>Guarnición</span><small>Z</small></button>
@@ -450,18 +480,18 @@ const DIFFS={
   dificil:{inc:1.35,bonus:3.5,think:.65,abil:true,name:'Difícil'}
 };
 const TYPES={
-  miner :{n:'Minero',    cost:150, hp:90,  spd:54,dmg:7, range:24, cd:1.0,atk:.55,hitAt:.55,build:3.5,pop:1,size:1},
-  sword :{n:'Espada',    cost:125, hp:130, spd:80,dmg:16,range:24, cd:.9, atk:.5, hitAt:.45,build:3,  pop:1,size:1},
-  archer:{n:'Arquero',   cost:300, hp:85,  spd:64,dmg:15,range:360,cd:1.8,atk:.9, hitAt:.72,build:4.5,pop:1,size:1,ranged:true},
-  spear :{n:'Lancero',   cost:450, hp:440, spd:46,dmg:26,range:34, cd:1.3,atk:.62,hitAt:.5, build:6,  pop:2,size:1.1,armor:.35},
-  mage  :{n:'Mago',      cost:600, hp:120, spd:48,dmg:40,range:290,cd:3.4,atk:1.0,hitAt:.6, build:7,  pop:2,size:1,ranged:true,aoe:64},
-  giant :{n:'Gigante',   cost:1400,hp:1700,spd:32,dmg:78,range:46, cd:2.5,atk:1.1,hitAt:.58,build:12, pop:4,size:2.1,aoe:62},
+  miner :{n:'Minero',    cost:150, hp:100, spd:54,dmg:10,range:24, cd:1.0,atk:.55,hitAt:.55,build:3.5,pop:1,size:1},
+  sword :{n:'Espada',    cost:125, hp:80,  spd:80,dmg:12,range:24, cd:.9, atk:.5, hitAt:.45,build:3,  pop:1,size:1},
+  archer:{n:'Arquero',   cost:300, hp:70,  spd:64,dmg:10,range:360,cd:1.8,atk:.9, hitAt:.72,build:4.5,pop:1,size:1,ranged:true},
+  spear :{n:'Lancero',   cost:500, hp:440, spd:46,dmg:15,range:34, cd:1.3,atk:.62,hitAt:.5, build:6,  pop:2,size:1.1,armor:.35},
+  mage  :{n:'Mago',      cost:1200,hp:150, spd:48,dmg:180,range:300,cd:5.5,atk:1.0,hitAt:.6, build:14, pop:5,size:1,ranged:true,aoe:85},
+  giant :{n:'Gigante',   cost:1500,hp:1000,spd:32,dmg:100,range:46, cd:2.5,atk:1.1,hitAt:.58,build:12, pop:4,size:2.1,aoe:62},
   minion:{n:'Esbirro',    cost:0,   hp:55,  spd:88,dmg:8, range:20, cd:.8, atk:.45,hitAt:.45,build:99, pop:0,size:.82},
   boss  :{n:'Rey Gigante',cost:3000,hp:5200,spd:24,dmg:100,range:58,cd:2.3,atk:1.2,hitAt:.58,build:99, pop:0,size:2.8,aoe:90},
 };
 const GI=u=>u.type==='giant'||u.type==='boss';
 // Spearmen: throw the spear (javelin), then fight with a short sword (xiphos) behind the shield
-const SPEAR_SWORD={...TYPES.spear,dmg:18,range:22,cd:.8,atk:.45,hitAt:.45},SPEAR_THROW={...TYPES.spear,atk:1.05,hitAt:.6};
+const SPEAR_SWORD={...TYPES.spear,dmg:11,range:22,cd:.8,atk:.45,hitAt:.45},SPEAR_THROW={...TYPES.spear,atk:1.05,hitAt:.6};
 const JAV_DMG=60;
 function ws(u){if(u.type!=='spear')return TYPES[u.type];if(u.atkKind==='throw')return SPEAR_THROW;return u.ammo>0?TYPES.spear:SPEAR_SWORD}
 const ORDER=['miner','sword','archer','spear','mage','giant'];
@@ -502,28 +532,36 @@ const UPG=[
   {id:'chest',n:'Tesoro de guerra', d:'+150 de oro al empezar cada batalla, por nivel.',  cost:30, max:3,req:1},
   {id:'barr', n:'Cuarteles',        d:'Las tropas se entrenan 10% más rápido por nivel.', cost:50, max:3,req:2},
   {id:'walls',n:'Muros de piedra',  d:'Tu estatua tiene +20% de vida por nivel.',          cost:40, max:3,req:1},
-  {id:'sword',n:'Forja: Espadas',   d:'+12% vida y +15% daño por nivel. Nivel 3: los golpes queman.',unit:'sword',tiers:['Acero y hombrera','Yelmo de hierro','Filo de brasa'], cost:35, max:3,req:1},
+  {id:'sword',n:'Forja: Espadas',   d:'+25% vida y daño por nivel (como en el original: 80→140 de vida). Nivel 3: los golpes queman.',unit:'sword',tiers:['Acero y hombrera','Yelmo de hierro','Filo de brasa'], cost:35, max:3,req:1},
   {id:'archer',n:'Forja: Arqueros', d:'+10% alcance y +12% daño por nivel. Nivel 3: flechas de fuego.',unit:'archer',tiers:['Arco largo y carcaj','Arco recurvo','Arco dorado'], cost:45, max:3,req:2},
-  {id:'spear',n:'Forja: Lanceros',  d:'+15% vida, +8% daño y +5% armadura por nivel. N1: la lanza atraviesa 3 enemigos. N2: llevan 2 lanzas. N3: el escudo bloquea 85% y devuelve flechas.',unit:'spear',tiers:['Lanza perforante','Doble lanza y yelmo','Escudo torre dorado'], cost:55, max:3,req:4},
+  {id:'spear',n:'Forja: Lanceros',  d:'+30% vida, +20% daño y +5% armadura por nivel. N1: la lanza atraviesa 3 enemigos. N2: llevan 2 lanzas. N3: el escudo bloquea 85% y devuelve flechas.',unit:'spear',tiers:['Lanza perforante','Doble lanza y yelmo','Escudo torre dorado'], cost:55, max:3,req:4},
   {id:'mage', n:'Forja: Magos',     d:'+15% daño y área por nivel.',unit:'mage',tiers:['Túnica','Cristal arcano','Orbes guardianes'], cost:60, max:3,req:5},
   {id:'giant',n:'Forja: Gigantes',  d:'+15% vida y daño por nivel.',unit:'giant',tiers:['Garrote con púas','Martillo de piedra','Mazo de hierro'], cost:70, max:3,req:7},
   {id:'well', n:'Pozo arcano',      d:'Maná: +25% regeneración y +20 inicial por nivel.',  cost:45, max:3,req:2},
   {id:'acad', n:'Academia',         d:'Las tropas nuevas nacen con un rango ★ por nivel.', cost:120,max:2,req:5},
 ];
+// In-battle forge (skirmish): gold cost and research time per level
+const FORGE_GOLD={miner:[300,500,700],sword:[300,600,900],archer:[400,700,1000],spear:[500,900,1300],mage:[800,1200,1600],giant:[900,1400,1900]};
+const FORGE_TIME=12;
 const SAVE_KEY='guerra-de-varas-v1';
 function freshSave(){return {unlocked:1,stars:LEVELS.map(()=>0),crowns:0,up:{}}}
 let SAVE=freshSave();
 try{const raw=localStorage.getItem(SAVE_KEY);if(raw){const d=JSON.parse(raw);SAVE={...freshSave(),...d,stars:LEVELS.map((_,i)=>(d.stars||[])[i]||0)}}}catch(e){}
 function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(SAVE))}catch(e){}}
 function baseMods(){return {hp:{},dmg:{},range:{},carry:1,mana:1,statue:1,rank0:0,build:1,armor:0,aoe:1,startGold:0,startMana:0}}
+// Stat multipliers of a unit's forge level (shared by the Armory and the in-battle skirmish forge)
+function forgeApply(m,unit,l){
+  if(unit==='miner')m.carry=1+.2*l;
+  else if(unit==='sword'){m.hp.sword=m.dmg.sword=1+.25*l}
+  else if(unit==='archer'){m.range.archer=1+.1*l;m.dmg.archer=1+.12*l}
+  else if(unit==='spear'){m.hp.spear=1+.3*l;m.dmg.spear=1+.2*l;m.armor=.05*l}
+  else if(unit==='mage'){m.dmg.mage=m.aoe=1+.15*l}
+  else if(unit==='giant'){m.hp.giant=m.dmg.giant=1+.15*l}
+}
 function playerMods(){
   const m=baseMods(),L=id=>SAVE.up[id]||0;
-  m.carry=1+.2*L('pick');m.startGold=150*L('chest');m.build=1-.1*L('barr');m.statue=1+.2*L('walls');
-  m.hp.sword=1+.12*L('sword');m.dmg.sword=1+.15*L('sword');
-  m.range.archer=1+.1*L('archer');m.dmg.archer=1+.12*L('archer');
-  m.hp.spear=1+.15*L('spear');m.dmg.spear=1+.08*L('spear');m.armor=.05*L('spear');
-  m.dmg.mage=m.aoe=1+.15*L('mage');
-  m.hp.giant=m.dmg.giant=1+.15*L('giant');
+  m.startGold=150*L('chest');m.build=1-.1*L('barr');m.statue=1+.2*L('walls');
+  for(const ty of ['miner','sword','archer','spear','mage','giant'])forgeApply(m,ty,L(TIER_UP[ty]));
   m.mana=1+.25*L('well');m.startMana=20*L('well');
   m.rank0=L('acad');
   return m;
@@ -578,7 +616,8 @@ function newGame(o){
   G.ai[0].push=G.cfg[0].push;G.ai[1].push=G.cfg[1].push;
   G.tiers=[{},{}];
   const et=L?L.forge:demo?2:(G.diff==='dificil'?1:0);
-  for(const ty of ORDER){G.tiers[0][ty]=L?(SAVE.up[TIER_UP[ty]]||0):demo?2:0;G.tiers[1][ty]=et;if(L&&et){G.mods[1].hp[ty]=G.mods[1].dmg[ty]=1+.05*et}}
+  for(const ty of ORDER){G.tiers[0][ty]=L?(SAVE.up[TIER_UP[ty]]||0):demo?2:0;G.tiers[1][ty]=et;if(L&&et){G.mods[1].hp[ty]=G.mods[1].dmg[ty]=1+.05*et}else if(!L&&!demo&&et)forgeApply(G.mods[1],ty,et)}
+  G.research=[{},{}];
   const p0=G.teams[0],p1=G.teams[1];
   p0.gold+=pm.startGold+(L&&L.goldBonus||0);p0.mana+=pm.startMana;
   p0.statue.max=p0.statue.hp=Math.round(3500*pm.statue);
@@ -868,6 +907,17 @@ function cast(team,key,x){
 }
 
 // ───────────────────────── training / AI ─────────────────────────
+function startForge(team,ty){
+  if(G.kind!=='skirmish')return 'Solo en escaramuza';
+  const lvl=(G.tiers[team][ty]||0)+1,cost=FORGE_GOLD[ty][lvl-1],tm=G.teams[team];
+  if(lvl>3)return 'Mejora al máximo';if(G.research[team][ty])return 'Ya se está mejorando';if(tm.gold<cost)return 'Falta oro';
+  tm.gold-=cost;G.research[team][ty]={t:0,lvl};return null;
+}
+function finishForge(team,ty,lvl){
+  const m=G.mods[team],h0=m.hp[ty]||1;G.tiers[team][ty]=lvl;forgeApply(m,ty,lvl);const r=(m.hp[ty]||1)/h0;
+  for(const u of G.units)if(u.team===team&&u.type===ty&&!u.dead){u.max*=r;u.hp=Math.min(u.max,u.hp*r+u.max*.1);part({k:'ring',z:u.z,x:u.x,y:GROUND+u.z,life:.6,sz:26,col:'#e9b041'});if(ty==='spear'&&lvl===2)u.ammo=Math.max(u.ammo,1)}
+  if(team===0&&!G.demo){const U=UPG.find(x=>x.unit===ty);toast(`Forja: ${TYPES[ty].n} → ${U.tiers[lvl-1]}`);sfx('rank');refreshCards();forgeDirty=true}
+}
 function train(team,type){
   const tm=G.teams[team],T=TYPES[type];
   if(!G.avail[team].includes(type))return 'Aún no disponible';
@@ -893,7 +943,7 @@ function ai(team,dt){
   if(miners<wantM&&tm.queue.miner<1&&tm.gold>=150&&!(foeS>myS*1.5&&army.length<3))train(team,'miner');
   else{
     if(!A.want){
-      const w={sword:4,archer:3};if(G.t>45||D.focus==='spear')w.spear=2.5;if(G.t>95||D.focus==='mage'&&G.t>40)w.mage=1.6;if(G.t>160||D.focus==='giant'&&G.t>70)w.giant=1.1;
+      const w={sword:4,archer:3};if(G.t>45||D.focus==='spear')w.spear=2.5;if(G.t>95||D.focus==='mage'&&G.t>40)w.mage=1.1;if(G.t>160||D.focus==='giant'&&G.t>70)w.giant=1.1;
       const archers=foes.filter(u=>u.type==='archer').length;if(archers>3)w.sword+=3;
       if(D.focus&&w[D.focus])w[D.focus]*=3;
       for(const k in w)if(!D.units.includes(k))delete w[k];if(!Object.keys(w).length)w.sword=1;
@@ -904,6 +954,10 @@ function ai(team,dt){
     if(A.want&&!train(team,A.want))A.want=null;
     else if(A.wantT>14)A.want=null;
   }
+  // skirmish AI researches upgrades for the unit type it fields most
+  if(G.kind==='skirmish'&&team===1&&Math.random()<.2){const cnt={};for(const u of mine)cnt[u.type]=(cnt[u.type]||0)+1;
+    const ty=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).find(t=>FORGE_GOLD[t]&&(G.tiers[1][t]||0)<3&&!G.research[1][t]);
+    if(ty&&tm.gold>FORGE_GOLD[ty][G.tiers[1][ty]||0]+250)startForge(1,ty)}
   // command
   let cmd=G.command[team];
   const threat=foes.some(u=>Math.abs(u.x-home)<1000);
@@ -976,7 +1030,7 @@ function updUnit(u,dt){
   if(u.atkT>=0){u.moving=false;tickAttack(u,dt);return}
   if(u.type==='miner')minerAI(u,dt);else soldierAI(u,dt);
 }
-function minerMult(team){return team===0&&G.kind==='campaign'?G.mods[0].carry:G.cfg[team].inc}
+function minerMult(team){return (team===0&&G.kind==='campaign'?1:G.cfg[team].inc)*G.mods[team].carry}
 function depositGold(u){
   const tm=G.teams[u.team],g=Math.round(u.carry);tm.gold+=g;
   if(u.team===0){G.stats.mined+=g;if(!G.demo){float(u.x,GROUND+u.z-60,'+'+g,'#e9b041',15,u.z);sfx('coin',u.x)}}
@@ -1115,6 +1169,7 @@ function update(dt){
     tm.gold+=dt*G.cfg[t].bonus;
     if(!G.over){const hasMiner=tm.queue.miner>0||G.units.some(u=>u.team===t&&u.type==='miner'&&!u.dead);
       if(!hasMiner&&tm.gold<TYPES.miner.cost){tm.reserve+=dt;if(tm.reserve>=12){tm.reserve=0;spawn(t,'miner');if(t===0&&!G.demo){toast('Tu estatua envía un minero de reserva');sfx('train')}}}else tm.reserve=0}
+    if(G.research&&!G.over)for(const ty in G.research[t]){const r=G.research[t][ty];r.t+=dt;if(r.t>=FORGE_TIME){delete G.research[t][ty];finishForge(t,ty,r.lvl)}}
     if(!G.over)for(const k of ORDER){if(tm.queue[k]>0){tm.prog[k]+=dt/(TYPES[k].build*G.mods[t].build);if(tm.prog[k]>=1){tm.prog[k]=0;tm.queue[k]--;spawn(t,k);if(t===0&&!G.demo){G.stats.trained++;sfx('train')}}}}
     if(!G.over&&(t===1||G.demo))ai(t,dt);
   }
@@ -2060,6 +2115,10 @@ function ui(dt){
   const cu=G.ctrl!==null?G.units.find(u=>u.id===G.ctrl):null;
   $('#ctrlTag').hidden=!cu;if(cu)setTxt('ctrlName',TYPES[cu.type].n+(cu.rank?' '+'★'.repeat(cu.rank):'')+(cu.type==='miner'?` · bolsa ${Math.round(cu.carry)} oro`:cu.type==='spear'?(cu.ammo>0?` · lanzas ${cu.ammo}`:' · espada'):''));
   document.body.classList.toggle('inmenu',mode==='menu');
+  const sk=mode==='play'&&G.kind==='skirmish';$('#forgeGrp').hidden=!sk;if(!sk)$('#forgePanel').hidden=true;
+  if(sk&&!$('#forgePanel').hidden){if(forgeDirty)renderForge();
+    $('#forgeList').querySelectorAll('.fp-item').forEach(b=>{const ty=b.dataset.ty,r=G.research[0][ty];b.querySelector('.fp-bar i').style.width=(r?r.t/FORGE_TIME*100:0)+'%';const c=b.querySelector('.fp-cost');if(c&&!r)b.classList.toggle('poor',G.teams[0].gold<+c.dataset.cost)})}
+  if(sk){const busy=Object.keys(G.research[0]).length;$('#btnForge').classList.toggle('on',busy>0)}
   $('#aimBar').hidden=!aiming;$('#rotOv').hidden=!(coarse&&!rotDismissed&&mode==='play'&&!G.demo&&innerHeight>innerWidth*1.15);
   $('#pad').hidden=!(cu&&coarse);document.body.classList.toggle('ctrlmode',!!(cu&&coarse));$('#padBlock').hidden=!(cu&&(cu.type==='spear'||cu.type==='sword'||cu.type==='minion'));$('#padSpecial').hidden=!(cu&&(cu.type==='spear'||cu.type==='mage'));if(cu)setTxt('padSpecial',cu.type==='spear'?'🎯':'✦');
   $('#timerChip').hidden=!G.survive;if(G.survive)setTxt('timer',fmt(Math.max(0,G.survive-G.t)));
@@ -2183,6 +2242,7 @@ function renderInfo(){
     ${C2('Zoom · girar',`rueda · clic derecho`,'pellizcar')}
     ${C2('Cambiar vista',K('V'),'📷')}
     ${C2('Seguir al frente','—','botón de mira')}
+    ${C2('Forja (escaramuza)',K('G'),'botón Forja','mejora armas y armaduras con oro')}
     ${C2('Pausa · sonido',K('P')+' · '+K('M'),'⏸ · 🔊')}</ul>`;
   else body.innerHTML='<div class="ucards">'+UNITS_INFO.map(([ty,n,role,desc,ctl])=>{const T=TYPES[ty];
     return `<div class="ucard"><header><img src="${thumb(ty,0)}" alt=""><div><b>${n}</b><span>${role}</span></div></header>
@@ -2194,6 +2254,19 @@ document.querySelectorAll('.menu-links [data-info]').forEach(b=>b.addEventListen
 document.querySelectorAll('#infoTabs button').forEach(b=>b.addEventListener('click',()=>{infoTab=b.dataset.t;renderInfo()}));
 document.querySelectorAll('#devSeg button').forEach(b=>b.addEventListener('click',()=>{dev=b.dataset.dev;renderInfo()}));
 $('#infoBack').addEventListener('click',()=>{$('#info').hidden=true;$('#menu').hidden=false});
+// ── forge panel (skirmish)
+let forgeDirty=true;
+function renderForge(){
+  const list=$('#forgeList');const tm=G.teams[0];
+  list.innerHTML=ORDER.filter(t=>G.avail[0].includes(t)).map(ty=>{const l=G.tiers[0][ty]||0,U=UPG.find(x=>x.unit===ty),r=G.research[0][ty],max=l>=3,cost=max?0:FORGE_GOLD[ty][l];
+    return `<button class="fp-item" data-ty="${ty}" ${max||r?'disabled':''}><span class="fp-top"><img src="${thumb(ty,Math.min(3,l+(max?0:1)))}" alt=""><span><b>${TYPES[ty].n}</b><br><small>${max?'Equipo completo':(r?'Forjando…':U.tiers[l])}</small></span></span>
+      <span class="fp-pips">${[0,1,2].map(i=>`<i class="${i<l?'on':''}"></i>`).join('')}</span>${max?'':`<span class="fp-cost" data-cost="${cost}">${cost} oro</span>`}<span class="fp-bar"><i></i></span></button>`}).join('');
+  list.querySelectorAll('.fp-item').forEach(b=>b.addEventListener('click',()=>{initAudio();const err=startForge(0,b.dataset.ty);if(err){toast(err);buzz(40)}else{sfx('train');forgeDirty=true}}));
+  forgeDirty=false;
+}
+function toggleForge(force){const p=$('#forgePanel');p.hidden=force!==undefined?!force:!p.hidden;if(!p.hidden){forgeDirty=true}}
+$('#btnForge').addEventListener('click',()=>{if(mode==='play'&&G.kind==='skirmish')toggleForge()});
+$('#forgeClose').addEventListener('click',()=>toggleForge(false));
 let rotDismissed=false;$('#rotDismiss').addEventListener('click',()=>{rotDismissed=true;$('#rotOv').hidden=true});
 $('#aimCancel').addEventListener('click',()=>{aiming=null});
 const KEYMAP={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down'};
@@ -2210,6 +2283,7 @@ window.addEventListener('keydown',e=>{
   else if(e.code==='KeyF'){inp.special=true;e.preventDefault()}
   else if(e.code==='Space'){inp.atk=true;inp.aimActive=false;e.preventDefault()}
   else if(e.code.startsWith('Digit')){const n=+e.code.slice(5);if(n>=1&&n<=6)playerTrain(ORDER[n-1])}
+  else if(e.code==='KeyG'){if(G.kind==='skirmish')toggleForge()}
   else if(e.code==='KeyZ')setCommand(0,0);else if(e.code==='KeyX')setCommand(0,1);else if(e.code==='KeyC')setCommand(0,2);
   else if(e.code==='KeyQ'){if(G.ctrl!==null)inp.block=true;else tryAbility('rain',true)}else if(e.code==='KeyE')tryAbility('rage',true);else if(e.code==='KeyR')tryAbility('meteor',true);
   else if(e.code==='Escape'){if(aiming)aiming=null;else releaseControl()}
@@ -2233,6 +2307,7 @@ function beginBattle(o){
   for(const kx of ORDER)cards[kx].b.hidden=!G.avail[0].includes(kx);
   document.querySelectorAll('#abils .cmd').forEach(b=>b.hidden=!G.abils[0].includes(b.dataset.a));
   $('#abils').hidden=!G.abils[0].length;refreshCards();camZoom=1;camYaw=camPitch=0;
+  forgeDirty=true;$('#forgePanel').hidden=true;
   if(o.kind==='campaign'){const L=LEVELS[o.level];toast(`${o.level+1}. ${L.n} · ${L.survive?'Resiste 4 minutos':L.boss?'Derriba el trono del Caos':'Derriba el monumento de '+L.n}`)}
   else toast(`Dificultad ${DIFFS[diffSel].name}. ¡Defiende la estatua!`);
 }

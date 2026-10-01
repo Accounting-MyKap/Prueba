@@ -115,7 +115,37 @@ Las mejoras de unidad de la Armería cambian el aspecto de la tropa en cada nive
 | Mago | Túnica | Cristal arcano | Orbes guardianes |
 | Gigante | Garrote con púas | Martillo de piedra | Mazo de hierro y casco con cuernos |
 
+### Forja en escaramuza
+
+En escaramuza no hay armería: las mejoras se compran con oro durante la batalla con el botón **Forja** (tecla `G`). Cada nivel tarda 12 segundos en forjarse, solo se puede forjar un nivel a la vez por unidad, y al terminar los soldados que ya están en el campo reciben la mejora (suben su vida máxima y se curan un 10%). La IA enemiga también forja su tropa más numerosa cuando le sobra oro.
+
+| Unidad | Nivel 1 | Nivel 2 | Nivel 3 | Efecto por nivel |
+|---|---|---|---|---|
+| Minero | 300 | 500 | 700 | +20% de oro por viaje |
+| Espada | 300 | 600 | 900 | +25% de vida y daño |
+| Arquero | 400 | 700 | 1000 | +10% de alcance, +12% de daño |
+| Lancero | 500 | 900 | 1300 | +30% de vida, +20% de daño, +5% de armadura |
+| Mago | 800 | 1200 | 1600 | +15% de daño y área |
+| Gigante | 900 | 1400 | 1900 | +15% de vida y daño |
+
+Los efectos son los mismos que los de la Armería de la campaña.
+
 En la campaña el Caos también mejora su equipo (+5% de vida y daño por nivel): forja 1 desde la batalla 4, forja 2 desde la 6 y forja 3 en la batalla final.
+
+## Estadísticas (como en Stick War Legacy)
+
+Vida, daño y coste se ajustaron a los valores del original:
+
+| Unidad | Oro | Vida | Daño | Población |
+|---|---|---|---|---|
+| Minero | 150 | 100 | 10 | 1 |
+| Espada (Swordwrath) | 125 | 80 | 12 | 1 |
+| Arquero (Archidon) | 300 | 70 | 10 | 1 |
+| Lancero (Spearton) | 500 | 440 | 15 (lanza) · 11 (espada corta) | 2 |
+| Mago (Magikill) | 1200 | 150 | 180 en área (85 px) | 5 |
+| Gigante | 1500 | 1000 | 100 | 4 |
+
+El Mago es una unidad de élite como el Magikill: caro y lento de entrenar, pero su explosión arrasa grupos enteros.
 
 ## Qué tiene
 
@@ -186,5 +216,6 @@ Basados en la guía de control del original. En el menú, *Controles* y *Unidade
 | `V` | Cambiar vista de cámara |
 | Rueda · clic derecho | Zoom · girar la cámara |
 | `P` · `M` | Pausa · Sonido |
+| `G` | Forja (solo en escaramuza): mejorar unidades con oro |
 
 En pantallas táctiles aparece una cruceta (▲ ◀ ▼ ▶) y botones de esquivar, saltar, bloquear 🛡, habilidad (🎯 lanza / ✦ esbirros), atacar ⚔ y soltar.
