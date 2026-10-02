@@ -132,6 +132,20 @@ Los efectos son los mismos que los de la Armería de la campaña.
 
 En la campaña el Caos también mejora su equipo (+5% de vida y daño por nivel): forja 1 desde la batalla 4, forja 2 desde la 6 y forja 3 en la batalla final.
 
+## Combos
+
+Como en el original, los distintos golpes salen solo con el botón de atacar: cada pulsación seguida (menos de 1,4 s entre golpes) encadena el siguiente movimiento, y la IA usa los mismos combos.
+
+| Unidad | Cadena de ataques |
+|---|---|
+| Espada | Tajo vertical → corte horizontal (2 enemigos) → estocada con avance → salto con golpe descendente (×1,5 daño, hasta 3 enemigos) |
+| Lancero (con lanza) | Lanzada alta → lanzada baja bajo el escudo → golpe de escudo (aturde) → embestida (×1,4 daño, empuja) |
+| Lancero (con espada) | Estocada → corte → tajo |
+| Gigante | Mazazo → barrido lateral que lanza lejos → salto y golpe (×1,35 daño) |
+| Minero | Golpe de pico → golpe lateral |
+| Arquero | Disparo de pie → disparo de rodilla |
+| Mago | Conjuro con las dos manos → lanzamiento de barrido con una mano |
+
 ## Estadísticas (como en Stick War Legacy)
 
 Vida, daño y coste se ajustaron a los valores del original:
